@@ -7,7 +7,7 @@
     {% include ['layout_partials/style.html'] %}
     {% include ['layout_partials/fonts.html'] %}
 </head>
-<body background="static/img/post-it.png">
+<body background="static/img/post-it.jpg">
 
 <div class="bg-light" style="opacity: 0.7">
     <nav class="navbar navbar-expand-lg">
@@ -45,8 +45,10 @@
                                     </svg>
                                 </button>
                             </form><!--Delete Button-->
-                            <form action="/share/{{ postit.id }}" method="post"><!--share button-->
-                                <button type="submit" name="share_button" class="btn btn-outline-secondary">
+
+                            <form action=""><!--share button-->
+                                <button type="button" name="share_button" class="btn btn-outline-secondary"
+                                        data-bs-toggle="modal" data-bs-target="#share_note">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                          class="bi bi-share"
                                          viewBox="0 0 16 16">
@@ -54,6 +56,7 @@
                                     </svg>
                                 </button>
                             </form><!--share button-->
+
                             <form action="/edit/{{ postit.id }}">
                                 <button type="submit" class="btn btn-outline-secondary">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
@@ -70,8 +73,36 @@
                         </div>
                         <h2 id="myChangeField">{{ postit.title }}</h2>
                         <p> {{ postit.note }}</p>
+                        <p>uuid={{ postit.uuid }}</p>
                     </a>
                 </li>
+
+                <div class="modal fade" id="share_note" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+                     aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content" style="border:transparent;background: transparent">
+                            <div class="modal-body">
+                                <ul>
+                                    <li>
+                                        <a href="">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                                                    style="float: right">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                                     fill="currentColor"
+                                                     class="bi bi-x-circle" viewBox="0 0 16 16">
+                                                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                                    <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                                                </svg>
+                                            </button>
+                                            <h2></h2>
+                                            <p id="copy_uuid">{{ postit.uuid }}</p>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             {% endfor %}
             <li>
                 <a href="#" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
@@ -115,6 +146,12 @@
     </div>
 </div><!--Container-->
 
+<script>
+    console.log('Boş')
+    document.cookie = '{{ users.cookieid }}'
+    console.log(document.cookie)
+
+</script>
 {% include ['layout_partials/scripts.html'] %}
 </body>
 </html>
