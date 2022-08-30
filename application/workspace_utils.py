@@ -10,7 +10,7 @@ class WorkspaceUtils:
         is_success = True
         unique_id = uuid.uuid4().hex
         if unique_id:
-            new_note = Postit(title=title, note=note, uuid=unique_id)
+            new_note = Postit(title=title, note=note, uuid=unique_id, workspace_id=1)
             db.session.add(new_note)
             db.session.commit()
         else:

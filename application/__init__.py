@@ -1,7 +1,9 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 
 db = SQLAlchemy()
+migrate = Migrate()
 
 
 def create_app():
@@ -14,6 +16,9 @@ def create_app():
     # configure db
     db.app = app
     db.init_app(app)
+
+    # configure migrations
+    migrate.init_app(app, db)
 
     load_blueprints(app)
 

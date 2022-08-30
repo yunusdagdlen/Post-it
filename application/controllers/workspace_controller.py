@@ -4,13 +4,13 @@ from flask import render_template, request, redirect, url_for
 
 from application import db
 from application.controller import mod_pages
-from application.models import Postit, Users
+from application.models import Postit, WorkSpaces
 from application.workspace_utils import WorkspaceUtils
 
 
 @mod_pages.route('/')
 def index():
-    users = Users.query.all()
+    users = WorkSpaces.query.all()
     postits = Postit.query.all()
     return render_template('index.html',
                            postit_list=postits,
@@ -26,11 +26,11 @@ def add_note():
         if title or note:
             WorkspaceUtils.add_note(title, note)
 
-            return redirect((url_for('index')))
+            return redirect((url_for('pages.index')))
 
-        return redirect((url_for('index')))
+        return redirect((url_for('pages.index')))
     else:
-        return redirect(url_for('index'))
+        return redirect(url_for('pages.index'))
 
 
 @mod_pages.route("/del/<string:id>", methods=['POST', 'GET'])
@@ -39,16 +39,16 @@ def delete_note(id):
         note_delete_list = Postit.query.filter_by(id=id).first()
         db.session.delete(note_delete_list)
         db.session.commit()
-        return redirect(url_for('index'))
+        return redirect(url_for('pages.index'))
     else:
-        return redirect(url_for('index'))
+        return redirect(url_for('pages.index'))
 
 
 @mod_pages.route('/share/<string:id>', methods=['POST', 'GET'])
 def share_note(id):
     sharing_note = Postit.query.filter_by(id=id).first()
     share_id = 'sharing-note/' + sharing_note.uuid
-    return redirect(share_id, url_for('index'))
+    return redirect(share_id, url_for('pages.index'))
 
 
 @mod_pages.route('/edit/<string:id>', methods=['POST', 'GET'])
@@ -67,6 +67,6 @@ def edit_note(id):
 @mod_pages.route('/back', methods=['POST', 'GET'])
 def back():
     if request.method == 'Post':
-        return redirect(url_for('index'))
+        return redirect(url_for('pages.index'))
     else:
-        return redirect(url_for('index'))
+        return redirect(url_for('pages.index'))

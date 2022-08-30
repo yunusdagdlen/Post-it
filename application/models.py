@@ -2,12 +2,16 @@ from application import db
 
 
 class Postit(db.Model):
+    __tablename__ = 'postit'
     id = db.Column(db.Integer, primary_key=True)
+    workspace_id = db.Column(db.Integer, db.ForeignKey('workspace.id'), nullable=False, index=True)
+    active = db.Column(db.Boolean, default=True)
     title = db.Column(db.String)
     note = db.Column(db.Text)
-    uuid = db.Column(db.String)
+    uuid = db.Column(db.String, nullable=False)
 
 
-class Users(db.Model):
-    tableid = db.Column(db.Integer, primary_key=True)
-    cookieid = db.Column(db.String)
+class WorkSpaces(db.Model):
+    __tablename__ = 'workspace'
+    id = db.Column(db.Integer, primary_key=True)
+    uuid = db.Column(db.String, nullable=False)
