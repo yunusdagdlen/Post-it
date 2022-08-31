@@ -1,20 +1,29 @@
 import uuid
 
-from flask import render_template, request, redirect, url_for
+import flask
+import requests
+from flask import render_template, request, redirect, url_for, abort, make_response
 
-from application import db
 from application.controller import mod_pages
-from application.models import Postit, WorkSpaces
-from application.workspace_utils import WorkspaceUtils
+from application.models import Postit
+from application.utils.workspace_utils import WorkspaceUtils
+from application.models import WorkSpaces
 
 
 @mod_pages.route('/')
 def index():
-    users = WorkSpaces.query.all()
-    postits = Postit.query.all()
-    return render_template('index.html',
-                           postit_list=postits,
-                           users=users)
+    workspace_uuid = request.args.get('workspace_uuid')
+    if not workspace_uuid:
+        workspace_uuid = request.cookies.get('workspace_uuid')
+        if not workspace_uuid:
+            workspace_uuid = WorkspaceUtils.create_workspace()
+
+    postits = WorkspaceUtils.get_workspace_notes(workspace_uuid=workspace_uuid)
+
+    resp = make_response(render_template('index.html',
+                           postit_list=postits,))
+    resp.set_cookie('workspace_uuid', workspace_uuid)
+    return resp
 
 
 @mod_pages.route('/add', methods=['POST', 'GET'])
@@ -22,51 +31,27 @@ def add_note():
     if request.method == 'POST':
         title = request.form.get('title')
         note = request.form.get('note')
-
         if title or note:
-            WorkspaceUtils.add_note(title, note)
-
+            workspace_id=request.cookies.get('workspace_uuid')
+            WorkspaceUtils.add_note(title, note,workspace_id)
             return redirect((url_for('pages.index')))
-
-        return redirect((url_for('pages.index')))
+        else:
+            return ''
     else:
-        return redirect(url_for('pages.index'))
+        abort(make_response("Not Found", 404))
 
 
 @mod_pages.route("/del/<string:id>", methods=['POST', 'GET'])
 def delete_note(id):
     if request.method == 'POST':
-        note_delete_list = Postit.query.filter_by(id=id).first()
-        db.session.delete(note_delete_list)
-        db.session.commit()
+        WorkspaceUtils.delete_note(id)
         return redirect(url_for('pages.index'))
     else:
-        return redirect(url_for('pages.index'))
-
-
-@mod_pages.route('/share/<string:id>', methods=['POST', 'GET'])
-def share_note(id):
-    sharing_note = Postit.query.filter_by(id=id).first()
-    share_id = 'sharing-note/' + sharing_note.uuid
-    return redirect(share_id, url_for('pages.index'))
-
-
-@mod_pages.route('/edit/<string:id>', methods=['POST', 'GET'])
-def edit_note(id):
-    edit_note = Postit.query.filter_by(id=id).first()
-    title = request.form.get('title')
-    note = request.form.get('note')
-    db.session.delete(edit_note)
-    newNote = Postit(title=title, note=note)
-    db.session.add(newNote)
-    db.session.commit()
-    return render_template('edit_notes.html',
-                           note=edit_note)
+        return '404 page'
 
 
 @mod_pages.route('/back', methods=['POST', 'GET'])
 def back():
-    if request.method == 'Post':
-        return redirect(url_for('pages.index'))
-    else:
-        return redirect(url_for('pages.index'))
+    return redirect(url_for('pages.index'))
+
+print(WorkspaceUtils.create_workspace())

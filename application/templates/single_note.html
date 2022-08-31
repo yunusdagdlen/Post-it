@@ -27,11 +27,15 @@
     </nav>
 </div>
 <div class="container-fluid">
-
-    <!--Postit note area-->
-    <div style="margin-top: 55px; color: black">
-        {{ postit.note }}
-    </div>
+    <ul>
+        <li>
+            <a href="" contenteditable="true">
+                <h2></h2>
+                <p>{{ postit.title }}</p>
+                <h2>{{ postit.note }}</h2>
+            </a>
+        </li>
+    </ul>
 
 </div><!--Container-->
 
