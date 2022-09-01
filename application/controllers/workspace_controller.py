@@ -21,7 +21,7 @@ def index():
     postits = WorkspaceUtils.get_workspace_notes(workspace_uuid=workspace_uuid)
 
     resp = make_response(render_template('index.html',
-                           postit_list=postits,))
+                                         postit_list=postits, ))
     resp.set_cookie('workspace_uuid', workspace_uuid)
     return resp
 
@@ -32,8 +32,8 @@ def add_note():
         title = request.form.get('title')
         note = request.form.get('note')
         if title or note:
-            workspace_id=request.cookies.get('workspace_uuid')
-            WorkspaceUtils.add_note(title, note,workspace_id)
+            workspace_id = request.cookies.get('workspace_uuid')
+            WorkspaceUtils.add_note(title, note, workspace_id)
             return redirect((url_for('pages.index')))
         else:
             return ''
@@ -41,10 +41,26 @@ def add_note():
         abort(make_response("Not Found", 404))
 
 
+@mod_pages.route('/edit-note/', methods=['POST', 'GET'])
+def edit_note():
+    if request.method == 'POST':
+        title = request.form.get('edited_title')
+        note = request.form.get('edited_note')
+        uuid = request.form.get('hidden_uuid')
+        workspace_id = request.cookies.get('workspace_uuid')
+        if title or note:
+            WorkspaceUtils.edit_note(title, note, uuid)
+            return redirect(url_for('pages.index'))
+        else:
+            return 'hata sayfası'
+    else:
+        abort(make_response("Not Found", 404))
+
+
 @mod_pages.route("/del/<string:id>", methods=['POST', 'GET'])
 def delete_note(id):
     if request.method == 'POST':
-        WorkspaceUtils.delete_note(id)
+        WorkspaceUtils.delete_note(id=id)
         return redirect(url_for('pages.index'))
     else:
         return '404 page'
@@ -53,5 +69,6 @@ def delete_note(id):
 @mod_pages.route('/back', methods=['POST', 'GET'])
 def back():
     return redirect(url_for('pages.index'))
+
 
 print(WorkspaceUtils.create_workspace())
