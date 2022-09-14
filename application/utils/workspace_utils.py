@@ -24,15 +24,15 @@ class WorkspaceUtils:
             is_success = False
         return is_success
 
-
     @staticmethod
-    def edit_note(title,note,uuid):
+    def edit_note(title, note, uuid):
         workspace_edit = Postit.query.filter_by(uuid=uuid).first()
-        edited_note=note
-        edited_title=title
-        workspace_edit.title=edited_title
-        workspace_edit.note=edited_note
+        edited_note = note
+        edited_title = title
+        workspace_edit.title = edited_title
+        workspace_edit.note = edited_note
         db.session.commit()
+
     @staticmethod
     def delete_note(id):
         is_success = True
@@ -47,7 +47,7 @@ class WorkspaceUtils:
     @staticmethod
     def get_workspace_notes(workspace_uuid):
         is_success = True
-        postits_records=[]
+        postits_records = []
         workspace_rec = WorkSpaces.query.filter_by(uuid=workspace_uuid).first()
         if workspace_rec:
             postits_records = Postit.query.filter_by(workspace_id=workspace_rec.uuid).all()
@@ -62,4 +62,3 @@ class WorkspaceUtils:
         db.session.add(new_workspace)
         db.session.commit()
         return unique_id
-

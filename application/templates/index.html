@@ -2,43 +2,40 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Post-it</title>
     <link rel="icon" href="static/img/page_icon.png">
     {% include ['layout_partials/style.html'] %}
     {% include ['layout_partials/fonts.html'] %}
 </head>
-<body background="static/img/post-it.jpg">
+<body>
 
-<div>
-    <nav class="navbar navbar-expand-sm bg-secondary navbar-light" style="opacity: 0.7">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="/back"><img src="../static/img/post_eat.png"
-                                                      style="width: 20px ;height: 20px">Post-Eat</a>
-        </div>
-        <div>
-            <form class="d-flex">
-                <input class="form-control me-2" type="text" id="get_workspace">
-                <button class="btn btn-primary" type="button" id="show_copy_workspace" onclick="get_workspace_func()">Show</button>
-            </form>
-        </div>
-    </nav>
-</div>
-<div class="container-fluid">
+<header class="Header">
+    <div class="Container Header-container">
+        <a href="/back" class="Header-logo" ><img src="static/img/page_icon.png" style="width:40px"><i class="fa-solid fa-note" style="color:#6C757D">POST-IT</i></a>
+        <button class="Header-menu btn btn-outline-secondary" id="show_copy_workspace" onclick="get_workspace_func()"><i class="fa-solid fa-floppy-disk"> Save Workspace</i></button>
+
+
+    </div>
+</header>
+
+
+<div class="Container">
 
     <!--Postit note area-->
     <div class="notes-field">
         <ul>
             {% for postit in postit_list %}
-                <li onclick="open_edit_modal('{{ postit.title }}','{{ postit.note }}','{{ postit.uuid }}')">
-                    <a href="#">
-                        <div class="btn-group" style="float: right">
+                <li id="{{ postit.id }}">
+                    <div class="fancy-postit">
+                        <div class="btn-group" style="float: right;max-width: 120px ">
                             <!--Delete Button-->
-                            <form action="/del/{{ postit.id }}" method="post">
-                                <button type="submit" name="del_button" class="btn btn-outline-secondary">
-                                    <i class="fa fa-trash-can"></i>
-                                </button>
-                            </form>
+                            <button type="button" name="del_button" class="btn btn-outline-secondary"
+                                    onclick="del_button('{{ postit.id }}')">
+                                <i class="fa fa-trash-can"></i>
+                            </button>
                             <!--Delete Button-->
+
                             <!--share button-->
                             <button type="button" name="share_button" class="btn btn-outline-secondary"
                                     onclick="open_share_modal('{{ postit.uuid }}')">
@@ -47,25 +44,26 @@
                             <!--share button-->
 
                             <!--edit button-->
-                            <button type="submit" name="edit_button" class="btn btn-outline-secondary"
-                                    onclick="open_edit_modal('{{ postit.title }}','{{ postit.note }}','{{ postit.uuid }}')">
+                            <button type="button" name="edit_button" class="btn btn-outline-secondary"
+                                    onclick="open_edit_modal('{{ postit.title }}','{{ postit.uuid }}')">
                                 <i class="fa-solid fa-pen-to-square"></i>
                             </button>
                             <!--edit button-->
 
                         </div>
-                        <h2 id="myChangeField">{{ postit.title }}</h2>
-                        <p> {{ postit.note }}</p>
-                    </a>
+                        <div onclick="open_edit_modal('{{ postit.title }}','{{ postit.uuid }}')">
+                            <b id="myChangeField">{{ postit.title }}</b>
+                            <p id="text_{{ postit.uuid }}"> {{ postit.note }}</p>
+                        </div>
+                    </div>
                 </li>
 
 
             {% endfor %}
             <li><!--Add postit button-->
-                <a href="#" data-bs-toggle="modal" data-bs-target="#staticBackdrop"
-                   style="width: 5em;height: 5em;border-radius:5em;overflow: hidden ">
-                    <center><i class="fa-solid fa-plus"></i></center>
-                </a>
+                <div class="add_content fancy-postit" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                    <i class="plus-icon fa-sharp fa-solid fa-circle-plus"></i>
+                </div>
             </li>
         </ul>
     </div>
@@ -74,17 +72,33 @@
     <div class="modal fade" id="share_note" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
          aria-labelledby="staticBackdropLabel" aria-hidden="true">
         <div class="modal-dialog">
-            <div class="modal-content" style="border:transparent">
-                <div class="modal-body">
+            <div class="modal-content" style="border:transparent;background: transparent">
+                <div class="modal-body notes-field">
                     <ul>
                         <li>
 
-                            <a href="#" id="go_single_note">
-                                <p id="copy_uuid">shre link stands here!</p>
-                            </a>
+                            <div>
+                                <div class="fancy-postit" id="go_single_note">
+                                    <div class="btn-group" style="float: right">
+                                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </div>
+                                    <div onclick="open_single_note()">
+                                        <b>Share...</b>
+                                        <a id="copy_uuid" style="text-decoration: none" style="font-family:'Poppins', sans-serif;">shre link stands
+                                            here!</a>
+                                    </div>
+                                    <div class="btn-group" style="float: right">
+                                        <button type="button" name="share_button" class="btn btn-outline-secondary"
+                                                id="copy_link_button" onclick="copy_single_note_url()">
+                                            <i class="fa-solid fa-link">Copy</i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </li>
                     </ul>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -93,69 +107,120 @@
 
     <!-- add Modal -->
     <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-         aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="staticBackdropLabel" style="color: black">Add Note</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                            style="background-color: transparent;border: 0px">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form action="/add" method="post">
-                        <div class="form-group">
-                            <label for="title" style="color: black">Title:</label>
-                            <input type="text" class="form-control" placeholder="Enter Title" name="title">
-                        </div>
-                        <div class="form-group">
-                            <label for="pwd" style="color: black">Note:</label>
-                            <textarea type="text" class="form-control" placeholder="Enter Note" name="note"></textarea>
-                        </div>
-                        <center>
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary">Save</button>
-                        </center>
+         aria-labelledby="staticBackdropLabel" aria-hidden="true" style="margin-top: 120px; opacity: 0.9">
+        <div class="modal-dialog" style="opacity:5;">
+            <div class="modal-content add_content_modal_body">
+                <div class="modal-body notes-field">
+                    <ul>
+                        <li>
+                            <div class="fancy-postit" style="max-height: 30em;min-width: 43em">
+                                <form action="/add" method="post">
+                                    <h2 style="float: left">Add Note</h2>
+                                    <div class="btn-group" style="float: right;max-width: 20em;max-width: 43em">
+                                        <button type="button" class="btn btn-outline-secondary"
+                                                data-bs-dismiss="modal">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" placeholder="Enter Title"
+                                                   name="title"
+                                                   style="background-color: transparent;font-family: 'Roboto Slab', serif;">
+                                        </div>
+                                        <div class="form-group">
+                                            <textarea type="text" class="form-control" placeholder="Enter Note"
+                                                      name="note"
+                                                      style="background-color: transparent; font-family: 'Indie Flower', cursive;font-size: 2rem;max-width: 20em;max-width: 43em"></textarea>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <center>
+                                            <button type="submit" class="btn btn-outline-secondary"
+                                                    data-bs-dismiss="modal"
+                                                    style="float: right">
+                                                <i class="fa-regular fa-floppy-disk"> SAVE</i>
+                                            </button>
+                                        </center>
+                                    </div>
+                                </form>
+                            </div>
+                        </li>
+                    </ul>
                     </form>
                 </div>
             </div>
         </div>
     </div>    <!-- add Modal -->
+
+    <!---->
+    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="staticBackdropLabel">Modal title</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Understood</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+    <!---->
+
+
+
     <!--Edit Modal-->
     <div class="modal fade" id="edit_note_modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
-         aria-labelledby="staticBackdropLabel" aria-hidden="true">
+         aria-labelledby="staticBackdropLabel" aria-hidden="true" style="margin-top: 120px">
         <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="staticBackdropLabel" style="color: black">Edit Note</h5>
-
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                            style="background-color: transparent;border: 0px">
-                        <i class="fa-solid fa-xmark"></i>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form action="/edit-note/" method="post">
-                        <div class="form-group">
-                            <label for="title" style="color: black">Edit Title:</label>
-                            <input type="text" class="form-control" placeholder="Enter Title" name="edited_title"
-                                   id="postit_edit_title">
-                        </div>
-                        <div class="form-group">
-                            <label for="pwd" style="color: black">Note:</label>
+            <div class="modal-content"
+                 style="background-color: transparent;border: 0px transparent;max-width: 700px;max-height: 500px;">
+                <div class="modal-body notes-field">
+                    <ul>
+                        <li>
+                            <div class="fancy-postit" style="max-height: 30em;min-width: 43em">
+                                <h2 style="float: left">Edit Note</h2>
+                                <div class="btn-group" style="float: right;max-width: 20em;max-width: 43em">
+                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                </div>
+                                <form action="/edit-note/" method="post">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" placeholder="Enter Title"
+                                               name="edited_title"
+                                               id="postit_edit_title" style="background-color: transparent; ">
+                                    </div>
+                                    <div class="form-group" style="font-family: Lato;font: 2em bold">
                             <textarea type="text" class="form-control" placeholder="Enter Note" name="edited_note"
-                                      id="postit_edit_content"></textarea>
-                        </div>
-                        <div hidden>
-                            <input type="text" value="" id="hidden_uuid" name="hidden_uuid">
-                        </div>
-                        <center>
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary">Save</button>
-                        </center>
-                    </form>
+                                      id="postit_edit_content"
+                                      style="background-color: transparent; font-family:  'Poppins', sans-serif;;
+                                        font-size: 2rem;max-width: 360px;max-width: 43em"></textarea>
+                                    </div>
+                                    <div hidden>
+                                        <input type="text" value="" id="hidden_uuid" name="hidden_uuid">
+                                    </div>
+                                    <center>
+                                        <button type="submit" class="btn btn-outline-secondary" data-bs-dismiss="modal"
+                                                style="float: right">
+                                            <i class="fa-regular fa-floppy-disk"> SAVE</i>
+                                        </button>
+                                    </center>
+                                </form>
+                            </div>
+                        </li>
+                    </ul>
                 </div>
+
             </div>
         </div>
     </div>
@@ -166,6 +231,20 @@
 
 {% include ['layout_partials/scripts.html'] %}
 <script>
+    function del_button(id) {
+        $.ajax({
+            type: 'POST',
+            url: `del/${id}`,
+            success: function () {
+                $(`#${id}`).fadeOut()
+            },
+            error: function () {
+                alert('Eroor')
+            }
+        });
+    }
 </script>
 </body>
 </html>
+
+

@@ -4,43 +4,31 @@
     <meta charset="UTF-8">
     <title>{{ postit.title }}</title>
     <link rel="icon" href="../static/img/page_icon.png">
-    {% include ['layout_partials/share_style.html'] %}
+    {% include ['layout_partials/style.html'] %}
     {% include ['layout_partials/fonts.html'] %}
 </head>
 <body background="../static/img/post-it.jpg">
 <div>
-    <nav class="navbar navbar-expand-lg navbar-light bg-dark">
-        <center>
-            <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="/back">Home</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Features</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Add
-                        note</a>
-                </li>
-            </ul>
-        </center>
+    <nav class="navbar navbar-expand-sm bg-secondary navbar-light" style="opacity: 0.7">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/back">
+                <i class="fa-solid fa-ghost " style="color: yellow"></i> Post-Eat                       <!--Değişecek-->
+            </a>
+        </div>
     </nav>
 </div>
-<div class="container-fluid">
+<div class="container-fluid notes-field">
     <ul style="margin-top: 12em">
         <li>
-            <a href="#" contenteditable>
-                <button type="button" href="/back" class="btn btn-outline-secondary">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-                         class="bi bi-bookmark-star"
-                         viewBox="0 0 16 16">
-                        <path d="M7.84 4.1a.178.178 0 0 1 .32 0l.634 1.285a.178.178 0 0 0 .134.098l1.42.206c.145.021.204.2.098.303L9.42 6.993a.178.178 0 0 0-.051.158l.242 1.414a.178.178 0 0 1-.258.187l-1.27-.668a.178.178 0 0 0-.165 0l-1.27.668a.178.178 0 0 1-.257-.187l.242-1.414a.178.178 0 0 0-.05-.158l-1.03-1.001a.178.178 0 0 1 .098-.303l1.42-.206a.178.178 0 0 0 .134-.098L7.84 4.1z"/>
-                        <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.777.416L8 13.101l-5.223 2.815A.5.5 0 0 1 2 15.5V2zm2-1a1 1 0 0 0-1 1v12.566l4.723-2.482a.5.5 0 0 1 .554 0L13 14.566V2a1 1 0 0 0-1-1H4z"/>
-                    </svg>
+            <div class="fancy-postit">
+                <button type="button" href="/back" class="btn btn-outline-secondary" style="float: right" hidden>
+                    <i class="fa-regular fa-bookmark"></i>
                 </button>
-                <h2>{{ postit.title }}</h2>
-                <p>{{ postit.note }}</p>
-            </a>
+                <div contenteditable>
+                    <h2>{{ postit.title }}</h2>
+                    <p>{{ postit.note }}</p>
+                </div>
+            </div>
         </li>
     </ul>
 </div>

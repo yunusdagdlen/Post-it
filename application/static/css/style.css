@@ -1,0 +1,33 @@
+
+/* font-family: 'Roboto Slab', serif; başlık fontu*/
+.add_content {
+    width: 5em;
+    height: 5em;
+    border-radius: 15px;
+    overflow: hidden
+}
+
+.add_content_modal_body {
+    background-color: white;
+    opacity: 0.8;
+    border: 0px transparent;
+    max-width: 43em;
+    max-height: 20em;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: white;
+
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}

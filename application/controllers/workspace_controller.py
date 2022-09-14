@@ -15,8 +15,8 @@ def index():
     workspace_uuid = request.args.get('workspace_uuid')
     if not workspace_uuid:
         workspace_uuid = request.cookies.get('workspace_uuid')
-        if not workspace_uuid:
-            workspace_uuid = WorkspaceUtils.create_workspace()
+    if not workspace_uuid:
+        workspace_uuid = WorkspaceUtils.create_workspace()
 
     postits = WorkspaceUtils.get_workspace_notes(workspace_uuid=workspace_uuid)
 
@@ -60,15 +60,15 @@ def edit_note():
 @mod_pages.route("/del/<string:id>", methods=['POST', 'GET'])
 def delete_note(id):
     if request.method == 'POST':
-        WorkspaceUtils.delete_note(id=id)
-        return redirect(url_for('pages.index'))
+        issucces = WorkspaceUtils.delete_note(id=id)
+        if not issucces:
+            abort(make_response("Hata", 400))
+        return make_response('success', 200)
+
     else:
-        return '404 page'
+        abort(make_response("Accepted", 202))
 
 
 @mod_pages.route('/back', methods=['POST', 'GET'])
 def back():
     return redirect(url_for('pages.index'))
-
-
-print(WorkspaceUtils.create_workspace())
