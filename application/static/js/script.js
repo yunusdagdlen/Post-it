@@ -4,7 +4,7 @@ myChangeField.addEventListener('input', () => {
 })
 
 function open_share_modal(postit_uuid) {
-    var link = '/postit/' + postit_uuid;
+    var link = postit_uuid;
     $("#copy_uuid").text(link);
     $("#copied_hidden_link").val(link)
     $("#share_note").modal('show');
@@ -56,7 +56,7 @@ function copy_single_note_url(link) {
 
 function open_single_note() {
     link = $("#copy_uuid").text()
-    var win = window.open('' + link, '_blank');
+    var win = window.open('' + '/postit/'+link, '_blank');
     if (win) {
         //Browser has allowed it to be opened
         win.focus();

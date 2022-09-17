@@ -47,9 +47,9 @@ def edit_note():
         title = request.form.get('edited_title')
         note = request.form.get('edited_note')
         uuid = request.form.get('hidden_uuid')
-        workspace_id = request.cookies.get('workspace_uuid')
+        workspace_uuid = request.cookies.get('workspace_uuid')
         if title or note:
-            WorkspaceUtils.edit_note(title, note, uuid,workspace_id)
+            WorkspaceUtils.edit_note(title, note, uuid,workspace_uuid)
             return redirect(url_for('pages.index'))
         else:
             return 'hata sayfası'
@@ -59,9 +59,9 @@ def edit_note():
 
 @mod_pages.route("/del/<string:id>", methods=['POST', 'GET'])
 def delete_note(id):
-    if request.method == 'GET':
-        workspace_id = request.cookies.get('workspace_uuid')
-        issucces = WorkspaceUtils.delete_note(id=id,workspace_id=workspace_id)
+    if request.method == 'POST':
+        workspace_uuid = request.cookies.get('workspace_uuid')
+        issucces = WorkspaceUtils.delete_note(id=id,workspace_uuid=workspace_uuid)
         if not issucces:
             abort(make_response("Hata", 400))
         return make_response('success', 200)

@@ -12,21 +12,26 @@ class WorkspaceUtils:
     def add_note(title, note, workspace_id):
         is_success = True
         unique_id = uuid.uuid4().hex
-        if unique_id:
-            new_note = Postit(title=title,
-                              note=note,
-                              uuid=unique_id,
-                              workspace_id=workspace_id,
-                              active=True)
-            db.session.add(new_note)
-            db.session.commit()
+        workspace_record=WorkSpaces.query.filter_by(uuid=workspace_id).first()
+        if workspace_record:
+            if unique_id:
+                new_note = Postit(title=title,
+                                  note=note,
+                                  uuid=unique_id,
+                                  workspace_id=workspace_record.id,
+                                  active=True)
+                db.session.add(new_note)
+                db.session.commit()
+            else:
+                is_success = False
         else:
             is_success = False
         return is_success
 
     @staticmethod
-    def edit_note(title, note, uuid,workspace_id):
-        workspace_edit = Postit.query.filter_by(uuid=uuid,workspace_id=workspace_id).first()
+    def edit_note(title, note, uuid,workspace_uuid):
+        workspace_rec = WorkSpaces.query.filter_by(uuid=workspace_uuid, active=True).first()
+        workspace_edit = Postit.query.filter_by(uuid=uuid,workspace_id=workspace_rec.id).first()
         edited_note = note
         edited_title = title
         workspace_edit.title = edited_title
@@ -34,10 +39,11 @@ class WorkspaceUtils:
         db.session.commit()
 
     @staticmethod
-    def delete_note(id, workspace_id):
+    def delete_note(id, workspace_uuid):
         is_success = True
-        if id:
-            note_delete = Postit.query.filter_by(id=id,workspace_id=workspace_id).first()
+        workspace_rec=WorkSpaces.query.filter_by(uuid=workspace_uuid,active=True).first()
+        if workspace_rec:
+            note_delete = Postit.query.filter_by(id=id,workspace_id=workspace_rec.id).first()
             db.session.delete(note_delete)
             db.session.commit()
         else:
@@ -46,13 +52,10 @@ class WorkspaceUtils:
 
     @staticmethod
     def get_workspace_notes(workspace_uuid):
-        is_success = True
         postits_records = []
         workspace_rec = WorkSpaces.query.filter_by(uuid=workspace_uuid).first()
         if workspace_rec:
-            postits_records = Postit.query.filter_by(workspace_id=workspace_rec.uuid).all()
-        else:
-            is_success = False
+            postits_records = Postit.query.filter_by(workspace_id=workspace_rec.id).all()
         return postits_records
 
     @staticmethod
