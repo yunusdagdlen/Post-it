@@ -1,6 +1,6 @@
 .Header {
   background: #FFF;
-  opacity: 0.6;
+  opacity: 0.8;
 }
 .Header-logo {
   margin-right: auto;
@@ -13,7 +13,6 @@
 }
 .Header-container {
   display: flex;
-  opacity: 1;
   padding-top: 16px;
   padding-bottom: 16px;
 }

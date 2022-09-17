@@ -1,10 +1,10 @@
 body {
   background-color: #FFCCFF;
-  background-image: url("../img/post-it.jpg");
-  background-repeat: no-repeat;
-  background-position: top;
-  background-attachment: fixed;
-
+  background: url("../img/post-it.jpg")no-repeat center center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
 }
 
 .Container {

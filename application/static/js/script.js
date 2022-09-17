@@ -38,7 +38,7 @@ function copyToClipboard(text) {
 function get_workspace_func() {
     workspace_id = document.cookie
     link = 'http://127.0.0.1:5000/?'
-    copyText=link+workspace_id
+    copyText = link + workspace_id
     copyToClipboard(copyText);
     Swal.fire({
         position: 'center',
@@ -50,8 +50,8 @@ function get_workspace_func() {
 }
 
 function copy_single_note_url(link) {
-    var copy_link = link
-    copyToClipboard(link);
+    var url = '127.0.0.1:5000'
+    copyToClipboard(url+link);
 }
 
 function open_single_note() {
