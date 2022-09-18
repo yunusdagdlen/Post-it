@@ -1,13 +1,10 @@
-import uuid
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (C) 2022 Post-it
 
-import flask
-import requests
 from flask import render_template, request, redirect, url_for, abort, make_response
-
 from application.controller import mod_pages
-from application.models import Postit
 from application.utils.workspace_utils import WorkspaceUtils
-from application.models import WorkSpaces
 
 
 @mod_pages.route('/')
@@ -49,7 +46,7 @@ def edit_note():
         uuid = request.form.get('hidden_uuid')
         workspace_uuid = request.cookies.get('workspace_uuid')
         if title or note:
-            WorkspaceUtils.edit_note(title, note, uuid,workspace_uuid)
+            WorkspaceUtils.edit_note(title, note, uuid, workspace_uuid)
             return redirect(url_for('pages.index'))
         else:
             return 'hata sayfası'
@@ -61,7 +58,7 @@ def edit_note():
 def delete_note(id):
     if request.method == 'POST':
         workspace_uuid = request.cookies.get('workspace_uuid')
-        issucces = WorkspaceUtils.delete_note(id=id,workspace_uuid=workspace_uuid)
+        issucces = WorkspaceUtils.delete_note(id=id, workspace_uuid=workspace_uuid)
         if not issucces:
             abort(make_response("Hata", 400))
         return make_response('success', 200)

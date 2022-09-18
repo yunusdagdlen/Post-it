@@ -1,5 +1,8 @@
-from application import db
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (C) 2022 Post-it
 
+from application import db
 
 
 class Postit(db.Model):

@@ -65,3 +65,5 @@ function open_single_note() {
         alert('Please allow popups for this website');
     }
 }
+
+

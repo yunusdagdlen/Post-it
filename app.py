@@ -1,7 +1,6 @@
-from flask import Flask, url_for, render_template, request, redirect
-from flask_sqlalchemy import SQLAlchemy
-import uuid
-
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+# Copyright (C) 2022 Post-it
 
 from application import create_app
 
