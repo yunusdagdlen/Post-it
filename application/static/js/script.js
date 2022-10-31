@@ -51,12 +51,12 @@ function get_workspace_func() {
 
 function copy_single_note_url(link) {
     var url = '127.0.0.1:5000'
-    copyToClipboard(url+link);
+    copyToClipboard(url+'/postit/'+link);
 }
 
 function open_single_note() {
     link = $("#copy_uuid").text()
-    var win = window.open('' + '/postit/'+link, '_blank');
+    var win = window.open("" + "/postit/"+link, '_blank');
     if (win) {
         //Browser has allowed it to be opened
         win.focus();

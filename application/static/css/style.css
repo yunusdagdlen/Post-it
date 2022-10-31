@@ -8,8 +8,7 @@
 }
 
 .add_content_modal_body {
-    background-color: white;
-    opacity: 0.8;
+    background-color: rgba(255,255,255,08);
     border: 0px transparent;
     max-width: 43em;
     max-height: 20em;

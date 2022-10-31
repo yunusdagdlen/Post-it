@@ -13,12 +13,9 @@
 <header class="Header">
     <div class="Container Header-container">
         <a href="/back" class="Header-logo" >
-        <img src="static/img/page_icon.png" style="width:40px">
-        <i class="fa-solid fa-note" style="color:#6C757D;letter-spacing: 1px">POST-IT</i>
+        <i class="fa-solid fa-note" style="color:#6C757D;letter-spacing: 1px;font-size: 1.5em">POST IT</i>
         </a>
         <button class="Header-menu btn btn-outline-secondary" id="show_copy_workspace" onclick="get_workspace_func()"><i class="fa-solid fa-floppy-disk" style="letter-spacing: 1px"> Save Workspace</i></button>
-
-
     </div>
 </header>
 
@@ -89,12 +86,12 @@
                                     </div>
                                     <div onclick="open_single_note()">
                                         <b>Share...</b>
-                                        <a id="copy_uuid" style="text-decoration: none" style="font-family:'Poppins', sans-serif;">shre link stands
+                                        <a id="copy_uuid" style="font-family:'Poppins', sans-serif; cursor: pointer">shre link stands
                                             here!</a>
                                     </div>
                                     <div class="btn-group" style="float: right">
                                         <button type="button" name="share_button" class="btn btn-outline-secondary"
-                                                id="copy_link_button" style="margin-left: -15px" onclick="copy_single_note_url()">
+                                                id="copy_link_button" style="margin-left: -15px;" onclick="copy_single_note_url()">
                                             <i class="fa-solid fa-link">Copy Link</i>
                                         </button>
                                     </div>

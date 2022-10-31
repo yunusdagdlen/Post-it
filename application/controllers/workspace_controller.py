@@ -33,7 +33,7 @@ def add_note():
             WorkspaceUtils.add_note(title, note, workspace_id)
             return redirect((url_for('pages.index')))
         else:
-            return ''
+            return render_template('404_page.html')
     else:
         abort(make_response("Not Found", 404))
 
