@@ -33,7 +33,7 @@ p {
     overflow: hidden;
     text-decoration: none;
     color: #000;
-    background: #ffc;
+    background: #ccf;
     display: block;
     max-height: 320px;
     max-width: 560px;
@@ -52,7 +52,7 @@ p {
     transform: rotate(4deg);
     position: relative;
     top: 5px;
-    background: #cfc;
+    background: #ffc;
 }
 
 .notes-field ul li:nth-child(3n) .fancy-postit {
@@ -61,7 +61,7 @@ p {
     transform: rotate(-3deg);
     position: relative;
     top: -5px;
-    background: #ccf;
+    background: #cfc;
 }
 
 .notes-field ul li:nth-child(5n) .fancy-postit {
