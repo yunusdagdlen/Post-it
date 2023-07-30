@@ -1,0 +1,111 @@
+.cveItems {
+  display: inline-flex;
+  padding-left: 15px;
+
+
+  .&-cveCards {
+    border: 1px solid rgba(206, 206, 206, 1);
+    margin-right: 15px;
+    border-radius: 6px;
+    min-width: 300px;
+    max-width: 500px;
+    height: 575px;
+    background-color: rgba(160, 163, 189, 0.43);
+    width: max-content;
+    height: max-content;
+
+    .cveCardsHeader {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+  }
+}
+
+
+.cveCardsHeaderIco {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 46px;
+  height: 46px;
+  background-color: rgba(255, 255, 255, 1);
+  border-radius: 50%;
+  margin-top: 14px;
+  margin-left: 19px;
+  margin-right: 12px;
+}
+
+.cveCardsHeaderTitle {
+  color: rgba(66, 66, 101, 1);
+  font-family: Poppins;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 700;
+  margin-top: 14px;
+  line-height: normal;
+}
+
+.cveCardsHeaderTitle p {
+  color: rgba(160, 163, 189, 1);
+  font-family: Poppins;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  margin-top: -3px;
+
+}
+
+.cveCardsHeaderInfo {
+  float: right;
+  margin-top: 6px;
+  margin-right: 8px;
+}
+
+.cveCardsBody {
+  border-top: 1px solid rgba(206, 206, 206, 1);
+  margin-top: 12px;
+  background-color: rgba(255, 255, 255, 1);
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+  border-bottom-right-radius: 5px;
+  border-bottom-left-radius: 5px;
+}
+
+.cveCardsBodyInfo {
+  width: 100%;
+  color: rgba(160, 163, 189, 1);
+  font-family: Poppins;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  letter-spacing: 0em;
+  text-align: left;
+  padding-right: 20px;
+  padding-left: 20px;
+
+  justify-content: center;
+  align-items: center;
+}
+
+.cveCardsBodyInfoTwitter {
+  border-bottom: 1px solid rgba(240, 240, 240, 1);
+  border-right: 1px solid rgba(240, 240, 240, 1);
+  width: max-content;
+}
+
+.cveCardsBodyInfoAudience {
+  border-bottom: 1px solid rgba(240, 240, 240, 1);
+  width: max-content;
+}
+
+.cveCardsBodyInfoNews {
+  border-right: 1px solid rgba(240, 240, 240, 1);
+  width: max-content;
+}
+
+.cveCardsBodyInfoRepos {
+  width: max-content;
+}

@@ -7,7 +7,7 @@ from application.controller import mod_pages
 from application.utils.workspace_utils import WorkspaceUtils
 
 
-@mod_pages.route('/')
+@mod_pages.route('/postit')
 def index():
     workspace_uuid = request.args.get('workspace_uuid')
     if not workspace_uuid:
@@ -21,6 +21,7 @@ def index():
                                          postit_list=postits, ))
     resp.set_cookie('workspace_uuid', workspace_uuid)
     return resp
+
 
 
 @mod_pages.route('/add', methods=['POST', 'GET'])

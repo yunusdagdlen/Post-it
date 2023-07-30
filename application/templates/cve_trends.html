@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cve/cve_trends.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap" rel="stylesheet">
+    <style>
+        <!--
+        -->
+
+        <!--
+        -->
+        .cveCardsBodyInfoColumn {
+            justify-content: center;
+            align-items: center;
+        }
+
+    </style>
+
+
+</head>
+<body>
+
+<div class="container main">
+    <div class="container cveItems">
+        <div class="cveCards col-lg-12">
+            <div class="cveCardsHeader">
+                <div class="cveCardsHeaderIco">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="spidericon"><title>spider</title>
+                        <path d="M21.29 16.71L22.71 15.29L19.5 12.11L16.5 11.26L18.41 11L22.6 7.8L21.4 6.2L17.59 9.05L14.91 9.5L18.11 6.31L17 1.76L15 2.24L15.86 5.69L14.76 6.83A3 3 0 0 0 9.24 6.83L8.11 5.69L9 2.24L7 1.76L5.89 6.31L9.09 9.5L6.4 9.05L2.6 6.2L1.4 7.8L5.6 11L7.46 11.31L4.46 12.16L1.29 15.29L2.71 16.71L5.5 13.89L7.87 13.22L4 16.54V22H6V17.46L7.56 16.12A4.5 4.5 0 0 0 16.44 16.12L18 17.46V22H20V16.54L16.13 13.22L18.5 13.89Z"/>
+                    </svg>
+                </div>
+                <div class="cveCardsHeaderTitle">
+                    <span>CVE-2023-3519</span>
+                    <p>(critix)</p>
+                </div>
+                <div class="cveCardsHeaderInfo">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="infoicon"><title>
+                        information-slab-circle-outline</title>
+                        <path d="M11 7V9H13V7H11M14 17V15H13V11H10V13H11V15H10V17H14M22 12C22 17.5 17.5 22 12 22C6.5 22 2 17.5 2 12C2 6.5 6.5 2 12 2C17.5 2 22 6.5 22 12M20 12C20 7.58 16.42 4 12 4C7.58 4 4 7.58 4 12C4 16.42 7.58 20 12 20C16.42 20 20 16.42 20 12Z"/>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="cveCardsBody col-lg-12">
+                <div class="cveCardsBodyInfo">
+                    <center>
+                        <div class="row col-lg-12 cveCardsBodyInfoColumn">
+                            <div class="cveCardsBodyInfoTwitter col-lg-6">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="kusicon"><title>
+                                    twitter</title>
+                                    <path d="M22.46,6C21.69,6.35 20.86,6.58 20,6.69C20.88,6.16 21.56,5.32 21.88,4.31C21.05,4.81 20.13,5.16 19.16,5.36C18.37,4.5 17.26,4 16,4C13.65,4 11.73,5.92 11.73,8.29C11.73,8.63 11.77,8.96 11.84,9.27C8.28,9.09 5.11,7.38 3,4.79C2.63,5.42 2.42,6.16 2.42,6.94C2.42,8.43 3.17,9.75 4.33,10.5C3.62,10.5 2.96,10.3 2.38,10C2.38,10 2.38,10 2.38,10.03C2.38,12.11 3.86,13.85 5.82,14.24C5.46,14.34 5.08,14.39 4.69,14.39C4.42,14.39 4.15,14.36 3.89,14.31C4.43,16 6,17.26 7.89,17.29C6.43,18.45 4.58,19.13 2.56,19.13C2.22,19.13 1.88,19.11 1.54,19.07C3.44,20.29 5.7,21 8.12,21C16,21 20.33,14.46 20.33,8.79C20.33,8.6 20.33,8.42 20.32,8.23C21.16,7.63 21.88,6.87 22.46,6Z"/>
+                                </svg>
+                                <span>188 Tweets</span>
+                            </div>
+                            <div class="cveCardsBodyInfoAudience col-lg-6">
+                                <svg width="18" height="11" viewBox="0 0 18 11" fill="none"
+                                     xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 0C8.30381 0 7.63613 0.289731 7.14384 0.805456C6.65156 1.32118 6.375 2.02065 6.375 2.75C6.375 3.47935 6.65156 4.17882 7.14384 4.69454C7.63613 5.21027 8.30381 5.5 9 5.5C9.69619 5.5 10.3639 5.21027 10.8562 4.69454C11.3484 4.17882 11.625 3.47935 11.625 2.75C11.625 2.02065 11.3484 1.32118 10.8562 0.805456C10.3639 0.289731 9.69619 0 9 0ZM9 1.57143C9.29837 1.57143 9.58452 1.6956 9.7955 1.91662C10.0065 2.13765 10.125 2.43742 10.125 2.75C10.125 3.06258 10.0065 3.36235 9.7955 3.58338C9.58452 3.8044 9.29837 3.92857 9 3.92857C8.70163 3.92857 8.41548 3.8044 8.2045 3.58338C7.99353 3.36235 7.875 3.06258 7.875 2.75C7.875 2.43742 7.99353 2.13765 8.2045 1.91662C8.41548 1.6956 8.70163 1.57143 9 1.57143ZM4.125 2.35714C3.62772 2.35714 3.15081 2.56409 2.79917 2.93247C2.44754 3.30084 2.25 3.80047 2.25 4.32143C2.25 5.06 2.6475 5.69643 3.2175 6.03429C3.4875 6.19143 3.795 6.28571 4.125 6.28571C4.455 6.28571 4.7625 6.19143 5.0325 6.03429C5.31 5.86929 5.5425 5.63357 5.715 5.35071C5.16861 4.60473 4.87326 3.69028 4.875 2.75V2.53C4.65 2.42 4.395 2.35714 4.125 2.35714ZM13.875 2.35714C13.605 2.35714 13.35 2.42 13.125 2.53V2.75C13.125 3.69286 12.8325 4.60429 12.285 5.35071C12.375 5.5 12.4725 5.61786 12.585 5.73571C12.9309 6.08701 13.3933 6.28415 13.875 6.28571C14.205 6.28571 14.5125 6.19143 14.7825 6.03429C15.3525 5.69643 15.75 5.06 15.75 4.32143C15.75 3.80047 15.5525 3.30084 15.2008 2.93247C14.8492 2.56409 14.3723 2.35714 13.875 2.35714ZM9 7.07143C7.245 7.07143 3.75 7.99071 3.75 9.82143V11H14.25V9.82143C14.25 7.99071 10.755 7.07143 9 7.07143ZM3.5325 7.50357C2.085 7.68429 0 8.45429 0 9.82143V11H2.25V9.48357C2.25 8.69 2.7675 8.03 3.5325 7.50357ZM14.4675 7.50357C15.2325 8.03 15.75 8.69 15.75 9.48357V11H18V9.82143C18 8.45429 15.915 7.68429 14.4675 7.50357ZM9 8.64286C10.1475 8.64286 11.43 9.03571 12.1725 9.42857H5.8275C6.57 9.03571 7.8525 8.64286 9 8.64286Z"
+                                          fill="#A0A3BD"/>
+                                </svg>
+                                <span>2.5M Audience</span>
+                            </div>
+                        </div>
+                    </center>
+                    <center>
+                        <div class="row col-lg-12">
+                            <div class="cveCardsBodyInfoNews col-lg-6">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="newsicon"><title>
+                                    newspaper-variant-outline</title>
+                                    <path d="M20 5L20 19L4 19L4 5H20M20 3H4C2.89 3 2 3.89 2 5V19C2 20.11 2.89 21 4 21H20C21.11 21 22 20.11 22 19V5C22 3.89 21.11 3 20 3M18 15H6V17H18V15M10 7H6V13H10V7M12 9H18V7H12V9M18 11H12V13H18V11Z"/>
+                                </svg>
+                                <span>52 news</span>
+                            </div>
+                            <div class="cveCardsBodyInfoRepos col-lg-6">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="githubicon"><title>
+                                    github</title>
+                                    <path d="M12,2A10,10 0 0,0 2,12C2,16.42 4.87,20.17 8.84,21.5C9.34,21.58 9.5,21.27 9.5,21C9.5,20.77 9.5,20.14 9.5,19.31C6.73,19.91 6.14,17.97 6.14,17.97C5.68,16.81 5.03,16.5 5.03,16.5C4.12,15.88 5.1,15.9 5.1,15.9C6.1,15.97 6.63,16.93 6.63,16.93C7.5,18.45 8.97,18 9.54,17.76C9.63,17.11 9.89,16.67 10.17,16.42C7.95,16.17 5.62,15.31 5.62,11.5C5.62,10.39 6,9.5 6.65,8.79C6.55,8.54 6.2,7.5 6.75,6.15C6.75,6.15 7.59,5.88 9.5,7.17C10.29,6.95 11.15,6.84 12,6.84C12.85,6.84 13.71,6.95 14.5,7.17C16.41,5.88 17.25,6.15 17.25,6.15C17.8,7.5 17.45,8.54 17.35,8.79C18,9.5 18.38,10.39 18.38,11.5C18.38,15.32 16.04,16.16 13.81,16.41C14.17,16.72 14.5,17.33 14.5,18.26C14.5,19.6 14.5,20.68 14.5,21C14.5,21.27 14.66,21.59 15.17,21.5C19.14,20.16 22,16.42 22,12A10,10 0 0,0 12,2Z"/>
+                                </svg>
+                                <span>65 Repos</span>
+                            </div>
+                        </div>
+                    </center>
+                </div>
+
+            </div>
+        </div>
+
+        <!---->
+        <div class="cveCards">
+            <div class="cveCardsHeader"></div>
+            <div class="cveCardsBody"></div>
+        </div>
+        <div class="cveCards">
+            <div class="cveCardsHeader"></div>
+            <div class="cveCardsBody"></div>
+        </div>
+        <div class="cveCards">
+            <div class="cveCardsHeader"></div>
+            <div class="cveCardsBody"></div>
+        </div>
+
+
+        {#    <div class="cveItems" id="cveItems">#}
+        {#        <table border="1px">#}
+        {#        <thead>#}
+        {#        <tr>#}
+        {#            <td>cve ID</td>#}
+        {#            <td>cvss</td>#}
+        {#        </tr>#}
+        {#        </thead>#}
+        {#        <tbody>#}
+        {#            {% block content %}#}
+        {#                {% for cveItem in cveItems %}#}
+        {#                    <tr>#}
+        {#                        <td>{{ cveItem["cveid"] }}</td>#}
+        {#                        <td>{{ cveItem["cvss"] }}</td>#}
+        {#                    </tr>#}
+        {#                {% endfor %}#}
+        {#            {% endblock %}#}
+        {#        </tbody>#}
+        {#        </table>#}
+
+
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"
+        integrity="sha512-3gJwYpMe3QewGELv8k/BX9vcqhryRdzRMxVfq6ngyWXwo03GFEzjsUm8Q7RZcHPHksttq7/GFoxjCVUjkjvPdw=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
+        crossorigin="anonymous"></script>
+<script>
+
+    {# window.onload = function () {
+         $.ajax({
+             url: 'http://127.0.0.1:5000/test',
+             type: 'GET',
+             dataType: 'json',
+             success: function (data) {
+                 console.log(data)
+                 //let html = ''
+                 //data.forEach((element) => {
+                 //html += '<div class="Container-cveItems-Header">Hello World</div><div class="Container-cveItems-Body" ></div>';
+                 //  console.log(element)
+                 //})
+                 // $("cveItems")[0].innerHTML = html;
+             },
+             error: function (request, error) {
+                 console.log("err", error)
+             }
+         });
+     }#}
+
+
+</script>
+</body>
+</html>
