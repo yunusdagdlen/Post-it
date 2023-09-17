@@ -7,7 +7,7 @@ from application.controller import mod_pages
 from application.utils.workspace_utils import WorkspaceUtils
 
 
-@mod_pages.route('/postit')
+@mod_pages.route('/')
 def index():
     workspace_uuid = request.args.get('workspace_uuid')
     if not workspace_uuid:
