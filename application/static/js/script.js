@@ -23,6 +23,18 @@ function open_edit_modal(title, uuid) {
 
 }
 
+function del_button(id) {
+    $.ajax({
+        type: 'POST',
+        url: `del/${id}`,
+        success: function () {
+            $(`#${id}`).fadeOut()
+        },
+        error: function () {
+            alert('Error')
+        }
+    });
+}
 
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text)
@@ -51,12 +63,12 @@ function get_workspace_func() {
 
 function copy_single_note_url(link) {
     var url = '127.0.0.1:5000'
-    copyToClipboard(url+'/postit/'+link);
+    copyToClipboard(url + '/postit/' + link);
 }
 
 function open_single_note() {
     link = $("#copy_uuid").text()
-    var win = window.open("" + "/postit/"+link, '_blank');
+    var win = window.open("" + "/postit/" + link, '_blank');
     if (win) {
         //Browser has allowed it to be opened
         win.focus();
@@ -66,4 +78,25 @@ function open_single_note() {
     }
 }
 
+function flip() {
+    $('.card-2').toggleClass('flipped');
+}
 
+flag = true;
+function flip_postit(id) {
+    if (flag) {
+        $(`#back_${id}`).css('display', 'none')
+        $(`#front_${id}`).css('display', '')
+        $(`#front_${id}`).fadeOut()
+        $(`#back_${id}`).fadeIn()
+        flag = false
+        console.log(2)
+    } else {
+        console.log(1)
+        $(`#back_${id}`).css('display', '')
+        $(`#front_${id}`).css('display', 'none')
+        $(`#front_${id}`).fadeIn()
+        $(`#back_${id}`).fadeOut()
+        flag = true
+    }
+}

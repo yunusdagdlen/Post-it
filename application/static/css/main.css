@@ -5,6 +5,7 @@
  * 1. Correct the line height in all browsers.
  * 2. Prevent adjustments of font size after orientation changes in iOS.
  */
+@import "formalize.css";
 @import "postit.css";
 @import "style.css";
 @import "header.css";
@@ -313,7 +314,7 @@ template {
 
 body {
   background-color: #FFCCFF;
-  background: url("../img/post-it.jpg")no-repeat center center fixed;
+  background: url("../img/post-it.jpg") no-repeat center center fixed;
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;

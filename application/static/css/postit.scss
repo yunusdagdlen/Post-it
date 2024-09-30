@@ -1,0 +1,61 @@
+.notes-field ul, li {
+    list-style: none;
+}
+
+.notes-field ul {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.notes-field ul li .fancy-postit {
+    border-radius: 15px;
+    overflow: hidden;
+    text-decoration: none;
+    color: #000;
+    background: #ccf;
+    display: block;
+    max-height: 320px;
+    max-width: 560px;
+    min-height: 8em;
+    min-width: 10em;
+    padding: 1em;
+    box-shadow: 5px 5px 7px rgba(33, 33, 33, .7);
+    transition: transform .15s linear;
+}
+
+
+.notes-field ul li:nth-child(even) .fancy-postit {
+    text-decoration: none;
+    color: #000;
+    position: relative;
+    background: #ffc;
+}
+
+.notes-field ul li:nth-child(3n) .fancy-postit {
+    text-decoration: none;
+    color: #000;
+    position: relative;
+    background: #cfc;
+}
+
+.notes-field ul li:nth-child(5n) .fancy-postit {
+    text-decoration: none;
+    color: #000;
+    position: relative;
+}
+
+.notes-field ul li .fancy-postit:hover, ul li .fancy-postit:focus {
+    border-radius: 15px;
+    overflow: auto;
+    text-decoration: none;
+    color: #000;
+    box-shadow: 5px 5px 7px rgba(33, 33, 33, .7);
+    transform: scale(1.05);
+    position: relative;
+    z-index: 5;
+}
+
+ul li {
+    margin: 1em;
+}
