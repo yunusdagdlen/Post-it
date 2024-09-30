@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (C) 2022 Post-it
-
+import bleach
 from flask import render_template, request, redirect, url_for, abort, make_response, jsonify
 from application.controller import mod_pages
 from application.utils.workspace_utils import WorkspaceUtils
@@ -27,9 +27,11 @@ def index():
 @mod_pages.route('/add', methods=['POST', 'GET'])
 def add_note():
     if request.method == 'POST':
-        title = request.form.get('title')
-        note = request.form.get('note')
+        title = request.form.get('title', '')
+        note = request.form.get('note', '')
         if title or note:
+            title = bleach.clean(title)
+            note = bleach.clean(note)
             workspace_id = request.cookies.get('workspace_uuid')
             WorkspaceUtils.add_note(title, note, workspace_id)
             return redirect((url_for('pages.index')))
@@ -42,11 +44,13 @@ def add_note():
 @mod_pages.route('/edit-note/', methods=['POST', 'GET'])
 def edit_note():
     if request.method == 'POST':
-        title = request.form.get('edited_title')
-        note = request.form.get('edited_note')
+        title = request.form.get('edited_title', '')
+        note = request.form.get('edited_note', '')
         uuid = request.form.get('hidden_uuid')
         workspace_uuid = request.cookies.get('workspace_uuid')
         if title or note:
+            title = bleach.clean(title)
+            note = bleach.clean(note)
             WorkspaceUtils.edit_note(title, note, uuid, workspace_uuid)
             return redirect(url_for('pages.index'))
         else:

@@ -86,14 +86,12 @@ flag = true;
 function flip_postit(id) {
     if (flag) {
         $(`#back_${id}`).css('display', 'none')
-        $(`#front_${id}`).css('display', '')
+        $(`#front_${id}`).css('display', 'flex')
         $(`#front_${id}`).fadeOut()
         $(`#back_${id}`).fadeIn()
         flag = false
-        console.log(2)
     } else {
-        console.log(1)
-        $(`#back_${id}`).css('display', '')
+        $(`#back_${id}`).css('display', 'flex')
         $(`#front_${id}`).css('display', 'none')
         $(`#front_${id}`).fadeIn()
         $(`#back_${id}`).fadeOut()
