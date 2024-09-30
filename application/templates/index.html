@@ -57,7 +57,7 @@
                                 <center><b id="myChangeField">{{ postit.title }}</b></center>
                             </div>
                             <div id="back_{{ postit.id }}" style="display: none">
-                                <p id="text_{{ postit.uuid }}"> {{ postit.note }}</p>
+                                <p id="text_{{ postit.uuid }}"> {{ postit.note | replace('\n', '<hr>') | safe }}</p>
                             </div>
                         </div>
                     </div>

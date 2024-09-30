@@ -89,7 +89,7 @@ def list_postits():
         for postit in postits:
             notes_list.append({
                 'title': postit.title,
-                'note_list': postit.note.splitlines(),
+                'note_list': postit.note.splitlines()[:3],
                 'uuid': postit.uuid
             })
 

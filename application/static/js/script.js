@@ -1,7 +1,3 @@
-const myChangeField = document.getElementById('myChangeField')
-myChangeField.addEventListener('input', () => {
-    console.log('INPUT')
-})
 
 function open_share_modal(postit_uuid) {
     var link = postit_uuid;
@@ -83,6 +79,7 @@ function flip() {
 }
 
 flag = true;
+
 function flip_postit(id) {
     if (flag) {
         $(`#back_${id}`).css('display', 'none')
@@ -91,7 +88,7 @@ function flip_postit(id) {
         $(`#back_${id}`).fadeIn()
         flag = false
     } else {
-        $(`#back_${id}`).css('display', 'flex')
+        $(`#back_${id}`).css('display', '')
         $(`#front_${id}`).css('display', 'none')
         $(`#front_${id}`).fadeIn()
         $(`#back_${id}`).fadeOut()
