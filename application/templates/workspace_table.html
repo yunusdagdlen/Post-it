@@ -23,7 +23,7 @@
 
 <div class="Container" style="margin-top: 20px; background: rgba(255,255,255,.4);border-radius: 5px">
 
-    <table class="table">
+    <table class="table table-striped">
         <thead>
         <tr>
             <th scope="col">Title</th>
@@ -31,8 +31,8 @@
         </tr>
         </thead>
         <tbody>
-        <tr>
-            {% for notes in notes_list %}
+        {% for notes in notes_list %}
+            <tr>
                 <td>{{ notes.title }}</td>
                 <td>
                     <ul>
@@ -42,8 +42,8 @@
                     </ul>
 
                 </td>
-            {% endfor %}
-        </tr>
+            </tr>
+        {% endfor %}
         </tbody>
     </table>
 
