@@ -16,6 +16,15 @@ def workspace_table():
     if not workspace_uuid:
         workspace_uuid = WorkspaceUtils.create_workspace()
 
-    resp = make_response(render_template('workspace_table.html'))
+    notes_list = []
+    if workspace_uuid:
+        postits = WorkspaceUtils.get_workspace_notes(workspace_uuid=workspace_uuid)
+        for postit in postits:
+            notes_list.append({
+                'title': postit.title,
+                'note_list': postit.note.splitlines()[:3],
+                'uuid': postit.uuid
+            })
+    resp = make_response(render_template('workspace_table.html', notes_list=notes_list))
     resp.set_cookie('workspace_uuid', workspace_uuid)
     return resp

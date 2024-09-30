@@ -12,18 +12,40 @@
 
 <header class="Header">
     <div class="Container Header-container">
-        <a href="/back" class="Header-logo" >
-        <i class="fa-solid fa-note" style="color:#6C757D;letter-spacing: 1px;font-size: 1.5em">POST IT</i>
+        <a href="/back" class="Header-logo">
+            <i class="fa-solid fa-note" style="color:#6C757D;letter-spacing: 1px;font-size: 1.5em">POST IT</i>
         </a>
-        <button class="Header-menu btn btn-outline-secondary" id="show_copy_workspace" onclick="get_workspace_func()"><i class="fa-solid fa-floppy-disk" style="letter-spacing: 1px"> Save Workspace</i></button>
+        <button class="Header-menu btn btn-outline-secondary" id="show_copy_workspace" onclick="get_workspace_func()"><i
+                class="fa-solid fa-floppy-disk" style="letter-spacing: 1px"> Save Workspace</i></button>
     </div>
 </header>
 
 
-<div class="Container">
+<div class="Container" style="margin-top: 20px; background: rgba(255,255,255,.4);border-radius: 5px">
 
-    <!--Table will placed here note area-->
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Title</th>
+            <th scope="col">Notes</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            {% for notes in notes_list %}
+                <td>{{ notes.title }}</td>
+                <td>
+                    <ul>
+                        {% for note in notes.note_list %}
+                            <li>{{ note }}</li>
+                        {% endfor %}
+                    </ul>
 
+                </td>
+            {% endfor %}
+        </tr>
+        </tbody>
+    </table>
 
 </div><!--Container-->
 
