@@ -15,6 +15,7 @@ def create_app():
 
     # configure it in order -> prod overrides prp overrides dev
     app.config.from_pyfile('../config/dev.cfg', silent=True)
+    app.config.from_pyfile('../config/prp.cfg', silent=True)
     app.config.from_pyfile('../config/prod.cfg', silent=False)
 
     # configure db
@@ -32,7 +33,6 @@ def create_app():
 def load_blueprints(app):
     from application.controller import mod_pages
     from application.controllers.workspace_controller import mod_pages as workspace_module
-    from application.controllers.cve_trends_controller import mod_pages
     from application.controllers.note_controller import mod_pages as notes_module
 
     app.register_blueprint(mod_pages)
