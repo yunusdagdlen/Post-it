@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) 2022 Post-it
 
-from flask import render_template, request, redirect, url_for, abort, make_response
+from flask import render_template, request, redirect, url_for, abort, make_response, jsonify
 from application.controller import mod_pages
 from application.utils.workspace_utils import WorkspaceUtils
 
@@ -71,3 +71,22 @@ def delete_note(id):
 @mod_pages.route('/back', methods=['POST', 'GET'])
 def back():
     return redirect(url_for('pages.index'))
+
+
+@mod_pages.route('/list_postits', methods=['GET'])
+def list_postits():
+    workspace_uuid = request.args.get('workspace_uuid')
+    if not workspace_uuid:
+        workspace_uuid = request.cookies.get('workspace_uuid')
+
+    notes_list = []
+    if workspace_uuid:
+        postits = WorkspaceUtils.get_workspace_notes(workspace_uuid=workspace_uuid)
+        for postit in postits:
+            notes_list.append({
+                'title': postit.title,
+                'note_list': postit.note.splitlines(),
+                'uuid': postit.uuid
+            })
+
+    return jsonify(notes_list)

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Post-it</title>
+    <link rel="icon" href="static/img/page_icon.png">
+    {% include ['layout_partials/style.html'] %}
+    {% include ['layout_partials/fonts.html'] %}
+</head>
+<body>
+
+<header class="Header">
+    <div class="Container Header-container">
+        <a href="/back" class="Header-logo" >
+        <i class="fa-solid fa-note" style="color:#6C757D;letter-spacing: 1px;font-size: 1.5em">POST IT</i>
+        </a>
+        <button class="Header-menu btn btn-outline-secondary" id="show_copy_workspace" onclick="get_workspace_func()"><i class="fa-solid fa-floppy-disk" style="letter-spacing: 1px"> Save Workspace</i></button>
+    </div>
+</header>
+
+
+<div class="Container">
+
+    <!--Table will placed here note area-->
+
+
+</div><!--Container-->
+
+
+{% include ['layout_partials/scripts.html'] %}
+<script>
+
+</script>
+</body>
+</html>
+
+
