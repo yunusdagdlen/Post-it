@@ -15,8 +15,11 @@
         <a href="/back" class="Header-logo">
             <i class="fa-solid fa-note" style="color:#6C757D;letter-spacing: 1px;font-size: 1.5em">POST IT</i>
         </a>
-        <button class="Header-menu btn btn-outline-secondary" id="show_copy_workspace" onclick="get_workspace_func()"><i
-                class="fa-solid fa-floppy-disk" style="letter-spacing: 1px"> Save Workspace</i></button>
+
+        <button class="Header-menu btn btn-outline-secondary" onclick="location.href='/back'"><i
+                    class="fa-solid fa-home" style="letter-spacing: 1px;"> Home</i></button>
+        <button class="Header-menu btn btn-outline-secondary" style="margin-left: 20px;" id="show_copy_workspace" onclick="get_workspace_func();"><i
+                class="fa-solid fa-floppy-disk" style="letter-spacing: 1px;"> Save Workspace</i></button>
     </div>
 </header>
 
@@ -28,27 +31,59 @@
         <tr>
             <th scope="col">Title</th>
             <th scope="col">Notes</th>
+            <th scope="col">Actions</th>
         </tr>
         </thead>
         <tbody>
-        {% for notes in notes_list %}
+        {% for postit in notes_list %}
             <tr>
-                <td>{{ notes.title }}</td>
+                <td>{{ postit.title }}</td>
                 <td>
                     <ul>
-                        {% for note in notes.note_list %}
+                        {% for note in postit.note_list %}
                             <li>{{ note }}</li>
                         {% endfor %}
                     </ul>
+                </td>
+                <td>
+                    <div class="btn-group" style="float: right;max-width: 120px ">
+                        <!--Delete Button-->
+                        <button type="button" name="del_button" class="btn btn-outline-secondary"
+                                onclick="del_button('{{ postit.id }}')">
+                            <i class="fa fa-trash-can"></i>
+                        </button>
+                        <!--Delete Button-->
 
+                        <!--share button-->
+                        <button type="button" name="share_button" class="btn btn-outline-secondary"
+                                onclick="open_share_modal('{{ postit.uuid }}')">
+                            <i class="fa-solid fa-share-from-square"></i>
+                        </button>
+                        <!--share button-->
+
+                        <!--edit button-->
+                        <button type="button" name="edit_button" class="btn btn-outline-secondary"
+                                onclick="open_edit_modal('{{ postit.title }}','{{ postit.uuid }}')">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <!--edit button-->
+                    </div>
                 </td>
             </tr>
         {% endfor %}
+            <tr>
+                <td colspan="3">
+                    <div  data-bs-toggle="modal" data-bs-target="#staticBackdrop" style="cursor: pointer;">
+                        <div><i class="fa-solid fa-plus"></i> Add New CARD</div>
+                    </div>
+                </td>
+            </tr>
         </tbody>
     </table>
 
 </div><!--Container-->
 
+{% include ['modals.html'] %}
 
 {% include ['layout_partials/scripts.html'] %}
 <script>

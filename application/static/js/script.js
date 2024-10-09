@@ -1,4 +1,3 @@
-
 function open_share_modal(postit_uuid) {
     var link = postit_uuid;
     $("#copy_uuid").text(link);
@@ -10,13 +9,21 @@ function open_share_modal(postit_uuid) {
 }
 
 function open_edit_modal(title, uuid) {
-    $("#edit_note_modal").modal('show');
-    var get_text = $("#text_" + uuid).text();
-    $("#postit_edit_title").val(title);
-    $("#postit_edit_content").val(get_text);
-    $("#hidden_uuid").val(uuid);
-    console.log()
-
+    $.ajax({
+        type: 'GET',
+        url: `get_note_text/${uuid}`,
+        success: function (data) {
+            console.log(data);
+            let get_text = data.note
+            $("#postit_edit_title").val(title);
+            $("#postit_edit_content").val(get_text);
+            $("#hidden_uuid").val(uuid);
+            $("#edit_note_modal").modal('show');
+        },
+        error: function () {
+            alert('Error')
+        }
+    });
 }
 
 function del_button(id) {

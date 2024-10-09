@@ -4,6 +4,7 @@
 import bleach
 from flask import render_template, request, redirect, url_for, abort, make_response, jsonify
 from application.controller import mod_pages
+from application.utils.notes_utils import SingleNoteUtils
 from application.utils.workspace_utils import WorkspaceUtils
 
 
@@ -94,3 +95,18 @@ def list_postits():
             })
 
     return jsonify(notes_list)
+
+
+@mod_pages.route('/get_note_text/<uuid>', methods=['GET'])
+def get_single_note_detail(uuid):
+    postit_rec = SingleNoteUtils.get_single_note(uuid)
+
+    note = {}
+    if postit_rec:
+        note = {
+                'title': postit_rec.title,
+                'note': postit_rec.note,
+                'uuid': postit_rec.uuid
+            }
+
+    return jsonify(note)
