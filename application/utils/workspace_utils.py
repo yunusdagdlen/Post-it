@@ -45,7 +45,7 @@ class WorkspaceUtils:
         workspace_rec = WorkSpaces.query.filter_by(uuid=workspace_uuid, active=True).first()
         if workspace_rec:
             note_delete = Postit.query.filter_by(id=id, workspace_id=workspace_rec.id).first()
-            db.session.delete(note_delete)
+            note_delete.active = False
             db.session.commit()
         else:
             is_success = False
