@@ -6,11 +6,12 @@ import uuid
 from datetime import datetime
 
 import bleach
-from flask import request
+from flask import request, current_app
 
 from application import db
 from application.models import Postit
 from application.models import WorkSpaces
+from application.thirdparty.ipwhois import IPWhois
 
 
 class WorkspaceUtils:
@@ -76,9 +77,15 @@ class WorkspaceUtils:
     def create_workspace():
         unique_id = uuid.uuid4().hex
         requester_ip = request.access_route[0]
+        ipwhois_client = IPWhois(current_app.config)
+
+        ipwhois_info = ipwhois_client.get_iphois_info(requester_ip)
+        country = ipwhois_info.get('country', {}).get('iso_code', '')
         new_workspace = WorkSpaces(uuid=unique_id,
                                    insert_date=datetime.utcnow(),
-                                   created_ip=requester_ip)
+                                   created_ip=requester_ip,
+                                   requester_whois=ipwhois_info,
+                                   requester_country=country)
         db.session.add(new_workspace)
         db.session.commit()
         return unique_id

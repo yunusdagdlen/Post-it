@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (C) 2022 Post-it
+from sqlalchemy.dialects.sqlite import JSON
 
 from application import db
 
@@ -22,3 +23,5 @@ class WorkSpaces(db.Model):
     active = db.Column(db.Boolean, default=True)
     created_ip = db.Column(db.String)
     insert_date = db.Column(db.DateTime)
+    requester_whois = db.Column(JSON)
+    requester_country = db.Column(db.String)
