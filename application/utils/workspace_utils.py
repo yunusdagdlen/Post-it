@@ -3,8 +3,10 @@
 # Copyright (C) 2022 Post-it
 
 import uuid
+from datetime import datetime
 
 import bleach
+from flask import request
 
 from application import db
 from application.models import Postit
@@ -73,7 +75,10 @@ class WorkspaceUtils:
     @staticmethod
     def create_workspace():
         unique_id = uuid.uuid4().hex
-        new_workspace = WorkSpaces(uuid=unique_id)
+        requester_ip = request.access_route[0]
+        new_workspace = WorkSpaces(uuid=unique_id,
+                                   insert_date=datetime.utcnow(),
+                                   created_ip=requester_ip)
         db.session.add(new_workspace)
         db.session.commit()
         return unique_id

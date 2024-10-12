@@ -20,3 +20,5 @@ class WorkSpaces(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     uuid = db.Column(db.String, nullable=False)
     active = db.Column(db.Boolean, default=True)
+    created_ip = db.Column(db.String)
+    insert_date = db.Column(db.DateTime)
