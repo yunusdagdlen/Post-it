@@ -3,6 +3,9 @@
 # Copyright (C) 2022 Post-it
 
 import uuid
+
+import bleach
+
 from application import db
 from application.models import Postit
 from application.models import WorkSpaces
@@ -52,11 +55,19 @@ class WorkspaceUtils:
         return is_success
 
     @staticmethod
-    def get_workspace_notes(workspace_uuid):
+    def get_workspace_notes(workspace_uuid, mode='default'):
         postits_records = []
+        mode = bleach.clean(mode)
         workspace_rec = WorkSpaces.query.filter_by(uuid=workspace_uuid).first()
         if workspace_rec:
-            postits_records = Postit.query.filter_by(workspace_id=workspace_rec.id).all()
+            postit_query = Postit.query.filter_by(workspace_id=workspace_rec.id)
+            if mode == 'active':
+                postit_query = postit_query.filter(Postit.active == True)
+            elif mode == 'deactive':
+                postit_query = postit_query.filter(Postit.active == False)
+
+            postits_records = postit_query.all()
+
         return postits_records
 
     @staticmethod

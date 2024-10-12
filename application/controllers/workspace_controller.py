@@ -11,12 +11,13 @@ from application.utils.workspace_utils import WorkspaceUtils
 @mod_pages.route('/')
 def index():
     workspace_uuid = request.args.get('workspace_uuid')
+    mode = request.args.get('mode', '')
     if not workspace_uuid:
         workspace_uuid = request.cookies.get('workspace_uuid')
     if not workspace_uuid:
         workspace_uuid = WorkspaceUtils.create_workspace()
 
-    postits = WorkspaceUtils.get_workspace_notes(workspace_uuid=workspace_uuid)
+    postits = WorkspaceUtils.get_workspace_notes(workspace_uuid=workspace_uuid, mode=mode)
 
     resp = make_response(render_template('index.html',
                                          postit_list=postits, ))
@@ -66,7 +67,7 @@ def delete_note(id):
         workspace_uuid = request.cookies.get('workspace_uuid')
         issucces = WorkspaceUtils.delete_note(id=id, workspace_uuid=workspace_uuid)
         if not issucces:
-            abort(make_response("Hata", 400))
+            abort(make_response("Error", 400))
         return make_response('success', 200)
 
     else:
@@ -90,7 +91,7 @@ def list_postits():
         for postit in postits:
             notes_list.append({
                 'title': postit.title,
-                'note_list': postit.note.splitlines()[:3],
+                'note_list': postit.note.splitlines(),
                 'uuid': postit.uuid
             })
 

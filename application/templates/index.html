@@ -24,32 +24,38 @@
     </div>
 </header>
 
+<div class="Container col-lg-12" style="margin-top: 20px;border-radius: 5px">
+    <div >
+        <button class="btn btn-sm " onclick="change_filter('')">Default</button>
+        <button class="btn btn-sm " onclick="change_filter('active')">Only Active</button>
+        <button class="btn btn-sm " onclick="change_filter('deactive')">Only Deactive</button>
+    </div>
+</div>
 
 <div class="Container">
-
     <!--Postit note area-->
     <div class="notes-field">
         <ul>
             {% for postit in postit_list %}
-                <li id="{{ postit.id }}">
+                <li id="{{ postit.id }}" class="{{ 'deleted' if postit.active is false else '' }}" id="{{ postit.id }}">
                     <div class="fancy-postit" onclick="flip_postit({{ postit.id }})">
                         <div class="btn-group" style="float: right;max-width: 120px ">
                             <!--Delete Button-->
-                            <button type="button" name="del_button" class="btn btn-outline-secondary"
-                                    onclick="del_button('{{ postit.id }}')">
+                            <button type="button" name="del_button" class="btn btn-outline-secondary btn-sm"
+                                    onclick="delete_postit('{{ postit.id }}')" {{ 'disabled' if postit.active is false else '' }}>
                                 <i class="fa fa-trash-can"></i>
                             </button>
                             <!--Delete Button-->
 
                             <!--share button-->
-                            <button type="button" name="share_button" class="btn btn-outline-secondary"
+                            <button type="button" name="share_button" class="btn btn-outline-secondary btn-sm"
                                     onclick="open_share_modal('{{ postit.uuid }}')">
                                 <i class="fa-solid fa-share-from-square"></i>
                             </button>
                             <!--share button-->
 
                             <!--edit button-->
-                            <button type="button" name="edit_button" class="btn btn-outline-secondary"
+                            <button type="button" name="edit_button" class="btn btn-outline-secondary btn-sm"
                                     onclick="open_edit_modal('{{ postit.title }}','{{ postit.uuid }}')">
                                 <i class="fa-solid fa-pen-to-square"></i>
                             </button>
@@ -63,6 +69,7 @@
                                 <span id="text_{{ postit.uuid }}"> {{ postit.note | replace('\n', '\n<hr>') | safe }}</span>
                             </div>
                         </div>
+                        {% if postit.active is false %}<span class="badge-deleted">Deleted</span> {% endif %}
                     </div>
                 </li>
 

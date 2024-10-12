@@ -26,17 +26,31 @@ function open_edit_modal(title, uuid) {
     });
 }
 
-function del_button(id) {
+function delete_postit(id) {
     $.ajax({
         type: 'POST',
         url: `del/${id}`,
         success: function () {
-            $(`#${id}`).fadeOut()
+            const urlParams = new URLSearchParams(window.location.search);
+            const mode = urlParams.get('mode');
+            if (mode === 'active') {
+                $(`#${id}`).fadeOut()
+            } else {
+                location.reload();
+            }
+
         },
         error: function () {
             alert('Error')
         }
     });
+}
+
+function change_filter(filter) {
+    const workspace_id = Cookies.get('workspace_uuid');
+    const link = window.location.pathname;
+    final_link = link + '?workspace_uuid=' + workspace_id + '&mode=' + filter;
+    window.location.href = final_link
 }
 
 function copyToClipboard(text) {
@@ -51,9 +65,9 @@ function copyToClipboard(text) {
 }
 
 function get_workspace_func() {
-    workspace_id = document.cookie
-    link = 'http://127.0.0.1:5000/?'
-    copyText = link + workspace_id
+    const workspace_id = Cookies.get('workspace_uuid');
+    const link = window.location.href;
+    copyText = link + '?workspace_uuid=' + workspace_id
     copyToClipboard(copyText);
     Swal.fire({
         position: 'center',
