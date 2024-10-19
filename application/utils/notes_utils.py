@@ -4,6 +4,7 @@
 
 from application.models import Postit
 
+
 class SingleNoteUtils:
     @staticmethod
     def get_single_note(uuid):

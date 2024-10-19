@@ -15,8 +15,6 @@ function open_edit_modal(title, uuid) {
     $("#postit_edit_title").val(title);
     $("#postit_edit_content").val(get_text);
     $("#hidden_uuid").val(uuid);
-    console.log()
-
 }
 
 function del_button(id) {
@@ -33,7 +31,11 @@ function del_button(id) {
 }
 
 function copyToClipboard(text) {
-    navigator.clipboard.writeText(text)
+    var $temp = $("<input>");
+    $("body").append($temp);
+    $temp.val(text).select();
+    document.execCommand("copy");
+    $temp.remove();
     Swal.fire({
         position: 'center',
         icon: 'success',

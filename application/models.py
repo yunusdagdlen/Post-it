@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (C) 2022 Post-it
+from sqlalchemy.dialects.postgresql import JSONB
 
 from application import db
 
@@ -13,6 +14,7 @@ class Postit(db.Model):
     title = db.Column(db.String)
     note = db.Column(db.Text)
     uuid = db.Column(db.String, nullable=False)
+    extra_info = db.Column(JSONB)
 
 
 class WorkSpaces(db.Model):

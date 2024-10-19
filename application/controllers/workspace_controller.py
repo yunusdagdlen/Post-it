@@ -9,54 +9,41 @@ from application.utils.workspace_utils import WorkspaceUtils
 
 @mod_pages.route('/')
 def index():
-    workspace_uuid = request.args.get('workspace_uuid')
-    if not workspace_uuid:
-        workspace_uuid = request.cookies.get('workspace_uuid')
-    if not workspace_uuid:
-        workspace_uuid = WorkspaceUtils.create_workspace()
-
-    postits = WorkspaceUtils.get_workspace_notes(workspace_uuid=workspace_uuid)
-
-    resp = make_response(render_template('index.html',
-                                         postit_list=postits, ))
-    resp.set_cookie('workspace_uuid', workspace_uuid)
-    return resp
+    workspace_id = request.args.get('workspace_id')
+    if not workspace_id:
+        workspace_id = WorkspaceUtils.create_workspace()
+    response = WorkspaceUtils.get_workspace_notes(workspace_id=workspace_id)
+    return jsonify(response)
 
 
-
-@mod_pages.route('/add', methods=['POST', 'GET'])
+@mod_pages.route('/add', methods=['GET'])
 def add_note():
-    if request.method == 'POST':
-        title = request.form.get('title', '')
-        note = request.form.get('note', '')
-        if title or note:
-            title = bleach.clean(title)
-            note = bleach.clean(note)
-            workspace_id = request.cookies.get('workspace_uuid')
-            WorkspaceUtils.add_note(title, note, workspace_id)
-            return redirect((url_for('pages.index')))
-        else:
-            return render_template('404_page.html')
-    else:
-        abort(make_response("Not Found", 404))
+    title = request.args.get('title', '')
+    note = request.args.get('note', '')
+    workspace_id = request.args.get('workspace_id', '')
+    color = request.args.get('color', '')
+    if workspace_id and title or note:
+        title = bleach.clean(title)
+        note = bleach.clean(note)
+        workspace_id = bleach.clean(workspace_id)
+        response = WorkspaceUtils.add_note(title, note, workspace_id,color)
+        return jsonify(response)
 
 
-@mod_pages.route('/edit-note/', methods=['POST', 'GET'])
+@mod_pages.route('/edit-note/', methods=['GET'])
 def edit_note():
-    if request.method == 'POST':
-        title = request.form.get('edited_title', '')
-        note = request.form.get('edited_note', '')
-        uuid = request.form.get('hidden_uuid')
-        workspace_uuid = request.cookies.get('workspace_uuid')
-        if title or note:
-            title = bleach.clean(title)
-            note = bleach.clean(note)
-            WorkspaceUtils.edit_note(title, note, uuid, workspace_uuid)
-            return redirect(url_for('pages.index'))
-        else:
-            return 'hata sayfası'
-    else:
-        abort(make_response("Not Found", 404))
+    title = request.args.get('title', '')
+    note = request.args.get('note', '')
+    note_id = request.args.get('note_id')
+    workspace_id = request.args.get('workspace_id')
+    if title or note:
+        title = bleach.clean(title)
+        note = bleach.clean(note)
+        response = WorkspaceUtils.edit_note(title, note, note_id, workspace_id)
+
+        if response['is_success']:
+            return jsonify(response)
+
 
 
 @mod_pages.route("/del/<string:id>", methods=['POST', 'GET'])

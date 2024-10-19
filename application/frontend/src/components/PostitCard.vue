@@ -1,0 +1,183 @@
+<template>
+  <div class="PostitMain">
+    <q-card
+      style="
+        color: black;
+        min-width: 20vh;
+        max-width: 500px;
+        min-height: 30px;
+        border-radius: 15px;
+        align-items: center;
+      "
+      :style="{ background: postit?.extra_info?.postit_color }"
+    >
+      <!--default view -->
+      <template> </template>
+      <q-card-section>
+        <div class="row">
+          <div class="text-h6 text-black col-9" style="word-break: break-all">
+            {{ this.title }}
+          </div>
+          <q-space />
+          <div
+            class="col-3"
+            style="display: flex; align-items: baseline; justify-content: end"
+          >
+            <q-btn rounded flat dense icon="mdi-menu" color="black">
+              <q-menu fit anchor="bottom left" self="top left">
+                <div class="row no-wrap q-pa-sm">
+                  <div class="column">
+                    <q-btn
+                      flat
+                      outline
+                      round
+                      color="black"
+                      icon="mdi-content-copy"
+                      size="sm"
+                    />
+                    <q-btn
+                      size="sm"
+                      flat
+                      outline
+                      round
+                      color="grey-7"
+                      icon="edit"
+                      @click="this.editNoteDialog = true"
+                    />
+                    <q-btn
+                      flat
+                      outline
+                      round
+                      color="grey-7"
+                      icon="delete"
+                      size="sm"
+                    />
+                  </div>
+                </div>
+              </q-menu>
+            </q-btn>
+          </div>
+        </div>
+      </q-card-section>
+      <q-card-section class="q-pt-none text-black">
+        {{ this.note }}
+      </q-card-section>
+      <!--just title view -->
+      <template>
+        <q-card-section>
+          <div class="row">
+            <div class="text-h6 text-black">Our Changing Planet</div>
+            <q-space />
+            <div>
+              <q-btn rounded flat dense icon="mdi-menu" color="black">
+                <q-menu>
+                  <div class="row no-wrap q-pa-md">
+                    <div class="column">
+                      <q-btn
+                        flat
+                        round
+                        outline
+                        color="primary"
+                        icon="mdi-share-outlined"
+                      />
+                      <q-btn flat outline round color="primary" icon="share" />
+                      <q-btn
+                        flat
+                        outline
+                        round
+                        color="primary"
+                        icon="shopping_cart"
+                      />
+                    </div>
+                  </div>
+                </q-menu>
+              </q-btn>
+            </div>
+          </div>
+        </q-card-section>
+        <q-card-section class="q-pt-none text-black">
+          test1234 test1234 test1234 test1234 test1234 test1234 test1234
+          test1234 test1234 test1234
+        </q-card-section>
+      </template>
+    </q-card>
+  </div>
+
+  <q-dialog @hide="editNote" v-model="editNoteDialog">
+    <q-card
+      style="color: black; width: 90vh; min-height: 220px; border-radius: 15px"
+      :style="{ background: postit?.extra_info?.postit_color }"
+    >
+      <q-card-section>
+        <div class="row full-width">
+          <q-input v-model="title" label="Title" class="full-width" />
+        </div>
+      </q-card-section>
+      <q-card-section class="q-pt-none text-black">
+        <div class="full-width">
+          <q-input
+            v-model="note"
+            outlined
+            type="textarea"
+            style="min-height: 100px !important"
+          />
+        </div>
+      </q-card-section>
+    </q-card>
+  </q-dialog>
+</template>
+<script>
+import axios from "axios";
+
+export default {
+  data() {
+    return {
+      editNoteDialog: false,
+      title: this.postit.title,
+      note: this.postit.note,
+    };
+  },
+  name: "PostitCard",
+  props: {
+    postit: {
+      type: Object,
+      required: true,
+    },
+  },
+  emits: ["ok"],
+  methods: {
+    editNote() {
+      const workspace_id = this.$route.query?.workspace_id;
+      const params = {
+        workspace_id: workspace_id,
+        note_id: this.postit.uuid,
+        title: this.title,
+        note: this.note,
+      };
+      axios
+        .get(
+          `http://127.0.0.1:5000/edit-note`,
+          { params },
+          { withCredentials: true }
+        )
+        .then((response) => {
+          if (response.status === 200) {
+            this.editNoteDialog = false;
+            this.$emit("ok");
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
+  },
+};
+</script>
+
+<style scoped>
+.PostitMain {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>
