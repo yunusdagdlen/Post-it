@@ -14,6 +14,7 @@ class Postit(db.Model):
     title = db.Column(db.String)
     note = db.Column(db.Text)
     uuid = db.Column(db.String, nullable=False)
+    extra_info = db.Column(JSON)
 
 
 class WorkSpaces(db.Model):

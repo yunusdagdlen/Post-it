@@ -3,8 +3,9 @@
 # Copyright (C) 2022 Post-it
 
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
+from flask_cors import CORS
 from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -26,6 +27,7 @@ def create_app():
     migrate.init_app(app, db)
 
     load_blueprints(app)
+    CORS(app)
 
     return app
 

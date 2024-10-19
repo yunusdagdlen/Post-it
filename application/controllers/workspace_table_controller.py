@@ -23,12 +23,12 @@ def workspace_table():
         postits = WorkspaceUtils.get_workspace_notes(workspace_uuid=workspace_uuid, mode=mode)
         for postit in postits:
             notes_list.append({
-                'id': postit.id,
-                'title': postit.title,
-                'note_list': postit.note.splitlines(),
-                'note': postit.note,
-                'uuid': postit.uuid,
-                'active': postit.active,
+                'id': postit['id'],
+                'title': postit['title'],
+                'note_list': postit['note'].splitlines(),
+                'note': postit['note'],
+                'uuid': postit['uuid'],
+                'active': postit['active'],
             })
     resp = make_response(render_template('workspace_table.html', notes_list=notes_list))
     resp.set_cookie('workspace_uuid', workspace_uuid)

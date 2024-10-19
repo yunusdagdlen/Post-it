@@ -16,16 +16,18 @@ from application.thirdparty.ipwhois import IPWhois
 
 class WorkspaceUtils:
     @staticmethod
-    def add_note(title, note, workspace_id):
+    def add_note(title, note, workspace_id, color='#fff'):
         is_success = True
         unique_id = uuid.uuid4().hex
         workspace_record = WorkSpaces.query.filter_by(uuid=workspace_id).first()
         if workspace_record:
             if unique_id:
+                extra_info = {'postit_color':color}
                 new_note = Postit(title=title,
                                   note=note,
                                   uuid=unique_id,
                                   workspace_id=workspace_record.id,
+                                  extra_info = extra_info,
                                   active=True)
                 db.session.add(new_note)
                 db.session.commit()
@@ -36,14 +38,20 @@ class WorkspaceUtils:
         return is_success
 
     @staticmethod
-    def edit_note(title, note, uuid, workspace_uuid):
-        workspace_rec = WorkSpaces.query.filter_by(uuid=workspace_uuid, active=True).first()
-        workspace_edit = Postit.query.filter_by(uuid=uuid, workspace_id=workspace_rec.id).first()
-        edited_note = note
-        edited_title = title
-        workspace_edit.title = edited_title
-        workspace_edit.note = edited_note
-        db.session.commit()
+    def edit_note(title, note, note_id, workspace_id):
+        response = {}
+        workspace_rec = WorkSpaces.query.filter_by(uuid=workspace_id, active=True).first()
+        workspace_edit = Postit.query.filter_by(uuid=note_id, workspace_id=workspace_rec.id).first()
+        workspace_edit.title = title
+        workspace_edit.note = note
+        try:
+            db.session.commit()
+            response['is_success'] = True
+        except:
+            response['is_success'] = False
+
+        return response
+
 
     @staticmethod
     def delete_note(id, workspace_uuid):
@@ -59,7 +67,7 @@ class WorkspaceUtils:
 
     @staticmethod
     def get_workspace_notes(workspace_uuid, mode='default'):
-        postits_records = []
+        return_list = []
         mode = bleach.clean(mode)
         workspace_rec = WorkSpaces.query.filter_by(uuid=workspace_uuid).first()
         if workspace_rec:
@@ -70,8 +78,18 @@ class WorkspaceUtils:
                 postit_query = postit_query.filter(Postit.active == False)
 
             postits_records = postit_query.all()
-
-        return postits_records
+            for rec in postits_records:
+                return_list.append({
+                    'id': rec.id,
+                    'workspace_id': rec.workspace_id,
+                    'active': rec.active,
+                    'title': rec.title,
+                    'note': rec.note,
+                    'uuid': rec.uuid,
+                    'extra_info': rec.extra_info,
+                })
+        return_list = sorted(return_list, key=lambda x: x['id'])
+        return return_list
 
     @staticmethod
     def create_workspace():
@@ -80,7 +98,8 @@ class WorkspaceUtils:
         ipwhois_client = IPWhois(current_app.config)
 
         ipwhois_info = ipwhois_client.get_iphois_info(requester_ip)
-        country = ipwhois_info.get('country', {}).get('iso_code', '')
+
+        country = ipwhois_info.get('country', {}).get('iso_code', '') if ipwhois_info else ''
         new_workspace = WorkSpaces(uuid=unique_id,
                                    insert_date=datetime.utcnow(),
                                    created_ip=requester_ip,
