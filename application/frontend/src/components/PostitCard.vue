@@ -9,6 +9,7 @@
         border-radius: 15px;
         align-items: center;
       "
+      @click="showNote = !this.showNote"
       :style="{
         background: postit?.extra_info?.postit_color
           ? postit?.extra_info?.postit_color
@@ -27,33 +28,39 @@
             style="display: flex; align-items: baseline; justify-content: end"
           >
             <q-btn rounded flat dense icon="mdi-menu" color="black">
-              <q-menu fit anchor="bottom left" self="top left">
+              <q-menu fit anchor="bottom right" self="top right">
                 <div class="row no-wrap q-pa-sm">
                   <div class="column">
                     <q-btn
                       size="sm"
                       flat
                       outline
-                      round
+                      rounded
+                      align="left"
                       color="grey-7"
                       icon="edit"
+                      label="Edit"
                       @click="this.editNoteDialog = true"
                     />
                     <q-btn
                       flat
                       outline
-                      round
+                      rounded
+                      align="left"
                       color="grey-7"
                       icon="delete"
+                      label="Delete"
                       size="sm"
                       @click="deleteNote"
                     />
                     <q-btn
                       flat
                       outline
-                      round
+                      rounded
+                      align="left"
                       color="grey-7"
                       icon="block"
+                      label="Disable"
                       size="sm"
                       @click="disableNote"
                     />
@@ -64,45 +71,9 @@
           </div>
         </div>
       </q-card-section>
-      <q-card-section class="q-pt-none text-black">
-        {{ this.note }}
-      </q-card-section>
-      <!--just title view -->
-      <template>
-        <q-card-section>
-          <div class="row">
-            <div class="text-h6 text-black">Our Changing Planet</div>
-            <q-space />
-            <div>
-              <q-btn rounded flat dense icon="mdi-menu" color="black">
-                <q-menu>
-                  <div class="row no-wrap q-pa-md">
-                    <div class="column">
-                      <q-btn
-                        flat
-                        round
-                        outline
-                        color="primary"
-                        icon="mdi-share-outlined"
-                      />
-                      <q-btn flat outline round color="primary" icon="share" />
-                      <q-btn
-                        flat
-                        outline
-                        round
-                        color="primary"
-                        icon="shopping_cart"
-                      />
-                    </div>
-                  </div>
-                </q-menu>
-              </q-btn>
-            </div>
-          </div>
-        </q-card-section>
+      <template v-if="this.showNote">
         <q-card-section class="q-pt-none text-black">
-          test1234 test1234 test1234 test1234 test1234 test1234 test1234
-          test1234 test1234 test1234
+          <span style="white-space: pre-line">{{ this.note }}</span>
         </q-card-section>
       </template>
     </q-card>
@@ -140,6 +111,8 @@ export default {
       editNoteDialog: false,
       title: this.postit.title,
       note: this.postit.note,
+      showNote: false,
+      menuButton: false,
     };
   },
   name: "PostitCard",

@@ -18,9 +18,13 @@
             <tr>
               <td class="text-left" style="width: 15%">{{ postit.title }}</td>
               <td class="text-left">
-                <span>
-                  {{ postit.note }}
-                </span>
+                <q-list separator>
+                  <template v-for="line in postit.note.split('\n')" :key="line">
+                    <q-item clickable v-ripple>
+                      <q-item-section>{{ line }}</q-item-section>
+                    </q-item>
+                  </template>
+                </q-list>
               </td>
               <td class="text-center" style="width: 200px">
                 <q-btn
