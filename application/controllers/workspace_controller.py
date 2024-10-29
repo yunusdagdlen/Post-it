@@ -24,17 +24,6 @@ def index():
     resp.set_cookie('workspace_uuid', workspace_uuid)
     return resp
 
-@mod_pages.route('/app')
-def index_app():
-    workspace_uuid = request.args.get('workspace_id')
-    mode = request.args.get('mode', '')
-    if not workspace_uuid:
-        workspace_uuid = WorkspaceUtils.create_workspace()
-
-    postits = WorkspaceUtils.get_workspace_notes(workspace_uuid=workspace_uuid, mode=mode)
-    return jsonify(postits)
-
-
 @mod_pages.route('/add', methods=['POST', 'GET'])
 def add_note():
     if request.method == 'POST':
@@ -51,34 +40,6 @@ def add_note():
     else:
         abort(make_response("Not Found", 404))
 
-
-@mod_pages.route('/app/add', methods=['GET'])
-def add_note_app():
-    title = request.args.get('title', '')
-    note = request.args.get('note', '')
-    workspace_id = request.args.get('workspace_id', '')
-    color = request.args.get('color', '')
-    if workspace_id and title or note:
-        title = bleach.clean(title)
-        note = bleach.clean(note)
-        workspace_id = bleach.clean(workspace_id)
-        response = WorkspaceUtils.add_note(title, note, workspace_id,color)
-        return jsonify(response)
-
-
-@mod_pages.route('/app/edit-note/', methods=['GET'])
-def edit_note_app():
-    title = request.args.get('title', '')
-    note = request.args.get('note', '')
-    note_id = request.args.get('note_id')
-    workspace_id = request.args.get('workspace_id')
-    if title or note:
-        title = bleach.clean(title)
-        note = bleach.clean(note)
-        response = WorkspaceUtils.edit_note(title, note, note_id, workspace_id)
-
-        if response['is_success']:
-            return jsonify(response)
 
 
 @mod_pages.route('/edit-note/', methods=['POST', 'GET'])
@@ -149,3 +110,63 @@ def get_single_note_detail(uuid):
             }
 
     return jsonify(note)
+
+
+
+
+@mod_pages.route('/app')
+def index_app():
+    workspace_uuid = request.args.get('workspace_id')
+    mode = request.args.get('mode', '')
+    response={}
+    if not workspace_uuid:
+        response['workspace_id'] = WorkspaceUtils.create_workspace()
+    else:
+        response['postits'] = WorkspaceUtils.get_workspace_notes(workspace_uuid=workspace_uuid, mode=mode)
+    return jsonify(response)
+
+@mod_pages.route('/app/add', methods=['GET'])
+def add_note_app():
+    title = request.args.get('title', '')
+    note = request.args.get('note', '')
+    workspace_id = request.args.get('workspace_id', '')
+    color = request.args.get('color', '')
+    if workspace_id and title or note:
+        title = bleach.clean(title)
+        note = bleach.clean(note)
+        workspace_id = bleach.clean(workspace_id)
+        response = WorkspaceUtils.add_note(title, note, workspace_id,color)
+        return jsonify(response)
+
+@mod_pages.route('/app/edit-note/', methods=['GET'])
+def edit_note_app():
+    title = request.args.get('title', '')
+    note = request.args.get('note', '')
+    note_id = request.args.get('note_id')
+    workspace_id = request.args.get('workspace_id')
+    if title or note:
+        title = bleach.clean(title)
+        note = bleach.clean(note)
+        response = WorkspaceUtils.edit_note(title, note, note_id, workspace_id)
+
+        if response['is_success']:
+            return jsonify(response)
+
+@mod_pages.route('/app/delete-note/', methods=['GET'])
+def delete_note_app():
+    note_id = request.args.get('note_id')
+    workspace_id = request.args.get('workspace_id')
+    if note_id and workspace_id:
+        response = WorkspaceUtils.delete_note(id=note_id, workspace_uuid=workspace_id)
+        if response['is_success']:
+            return jsonify(response)
+
+@mod_pages.route('/app/disable-note/', methods=['GET'])
+def disable_note_app():
+    note_id = request.args.get('note_id')
+    workspace_id = request.args.get('workspace_id')
+    if note_id and workspace_id:
+        response = WorkspaceUtils.disable_note(id=note_id, workspace_uuid=workspace_id)
+        if response['is_success']:
+            return jsonify(response)
+

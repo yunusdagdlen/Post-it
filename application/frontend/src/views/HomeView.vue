@@ -1,7 +1,14 @@
 <template class="q-px-xl">
-  <div class="home fullscreen scroll">
-    <div class="page-header q-mb-xl full-width bg-white">
-      <page-header @success="fetchAllNotes" />
+  <div class="home fullscreen q-mx-xl scroll">
+    <div
+      class="page-header q-mb-xl full-width bg-white"
+      style="border-radius: 15px"
+    >
+      <page-header
+        @success="fetchAllNotes"
+        @viewMode="changeViewMode"
+        :postitList="this.postitList"
+      />
     </div>
 
     <div
@@ -30,37 +37,36 @@ export default {
   data() {
     return {
       postitList: [],
+      viewMode: "active",
     };
   },
   methods: {
     fetchAllNotes() {
-      // const axiosInstance = axios.create({
-      //   timeout: 45000,
-      //   headers: {
-      //     "Access-Control-Allow-Origin": "*",
-      //     "Access-Control-Allow-Methods":
-      //       "GET, POST, PATCH, PUT, DELETE, OPTIONS",
-      //     "Access-Control-Allow-Credentials": true,
-      //     "Access-Control-Allow-Headers": "Origin, Content-Type, X-Auth-Token",
-      //     // eslint-disable-next-line no-undef
-      //   },
-      //   responseType: "json",
-      //   responseEncoding: "utf8",
-      //   withCredentials: true,
-      // });
-
       const workspace_id = this.$route.query?.workspace_id;
-      const params = { workspace_id: workspace_id };
+      const params = { workspace_id: workspace_id, mode: this.viewMode };
       axios
         .get(`http://127.0.0.1:5000/app`, { params }, { withCredentials: true })
         .then((response) => {
           if (response.status === 200) {
-            this.postitList = response.data;
+            this.postitList = response.data.postits;
+            if (response.data?.workspace_id) {
+              this.$router.push({
+                query: { workspace_id: response.data.workspace_id },
+              });
+            }
           }
         })
         .catch((error) => {
           console.log(error);
         });
+    },
+    changeViewMode() {
+      if (this.viewMode === "active") {
+        this.viewMode = "deactive";
+      } else {
+        this.viewMode = "active";
+      }
+      this.fetchAllNotes();
     },
   },
   mounted() {
@@ -74,8 +80,6 @@ export default {
   .page-header {
     height: 55px;
   }
-  padding-left: 10vh;
-  padding-right: 10vh;
   padding-top: 5vh;
 }
 </style>

@@ -9,10 +9,13 @@
         border-radius: 15px;
         align-items: center;
       "
-      :style="{ background: postit?.extra_info?.postit_color }"
+      :style="{
+        background: postit?.extra_info?.postit_color
+          ? postit?.extra_info?.postit_color
+          : '#59a5d8',
+      }"
     >
       <!--default view -->
-      <template> </template>
       <q-card-section>
         <div class="row">
           <div class="text-h6 text-black col-9" style="word-break: break-all">
@@ -27,14 +30,6 @@
               <q-menu fit anchor="bottom left" self="top left">
                 <div class="row no-wrap q-pa-sm">
                   <div class="column">
-                    <q-btn
-                      flat
-                      outline
-                      round
-                      color="black"
-                      icon="mdi-content-copy"
-                      size="sm"
-                    />
                     <q-btn
                       size="sm"
                       flat
@@ -51,6 +46,16 @@
                       color="grey-7"
                       icon="delete"
                       size="sm"
+                      @click="deleteNote"
+                    />
+                    <q-btn
+                      flat
+                      outline
+                      round
+                      color="grey-7"
+                      icon="block"
+                      size="sm"
+                      @click="disableNote"
                     />
                   </div>
                 </div>
@@ -157,6 +162,50 @@ export default {
       axios
         .get(
           `http://127.0.0.1:5000/app/edit-note`,
+          { params },
+          { withCredentials: true }
+        )
+        .then((response) => {
+          if (response.status === 200) {
+            this.editNoteDialog = false;
+            this.$emit("ok");
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
+    deleteNote() {
+      const workspace_id = this.$route.query?.workspace_id;
+      const params = {
+        workspace_id: workspace_id,
+        note_id: this.postit.uuid,
+      };
+      axios
+        .get(
+          `http://127.0.0.1:5000/app/delete-note/`,
+          { params },
+          { withCredentials: true }
+        )
+        .then((response) => {
+          if (response.status === 200) {
+            this.editNoteDialog = false;
+            this.$emit("ok");
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
+    disableNote() {
+      const workspace_id = this.$route.query?.workspace_id;
+      const params = {
+        workspace_id: workspace_id,
+        note_id: this.postit.uuid,
+      };
+      axios
+        .get(
+          `http://127.0.0.1:5000/app/disable-note/`,
           { params },
           { withCredentials: true }
         )
