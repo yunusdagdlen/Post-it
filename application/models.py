@@ -15,6 +15,7 @@ class Postit(db.Model):
     note = db.Column(db.Text)
     uuid = db.Column(db.String, nullable=False)
     extra_info = db.Column(JSON)
+    is_deleted = db.Column(db.Boolean, default=False)
 
 
 class WorkSpaces(db.Model):

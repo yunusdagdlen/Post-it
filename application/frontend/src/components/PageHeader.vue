@@ -1,8 +1,15 @@
 <template class="">
   <div class="PageHeader">
-    <q-header class="HeaderToolbar bordered bg-white">
+    <q-header class="HeaderToolbar q-mx-xl bordered bg-white">
       <q-toolbar class="q-px-xl rounded bordered">
-        <q-toolbar-title class="text-weight-medium">NotedFlow</q-toolbar-title>
+        <q-toolbar-title class="text-weight-medium">
+          <router-link
+            style="text-decoration: none; color: #adb5bd"
+            :to="{ path: 'app', query: { workspace_id: workspace_id } }"
+          >
+            NotedFlow
+          </router-link>
+        </q-toolbar-title>
         <div class="q-mr-md">
           <q-btn
             rounded
@@ -12,26 +19,34 @@
             class="q-px-md"
             @click="newNoteDialog"
           />
-        </div>
-        <div>
-          <q-btn rounded flat dense icon="mdi-menu" class="q-px-md">
-            <q-menu
-              fit
-              anchor="bottom start"
-              self="top start"
-              transition-show="jump-down"
-              transition-hide="jump-up"
-            >
-              <q-list style="min-width: 100px">
-                <q-item clickable>
-                  <q-item-section> Note List </q-item-section>
-                </q-item>
-                <q-item clickable>
-                  <q-item-section>Save Workspace</q-item-section>
-                </q-item>
-              </q-list>
-            </q-menu>
+          <q-btn
+            rounded
+            flat
+            dense
+            icon="list"
+            class="q-px-md"
+            :to="{
+              path: 'note-list',
+              query: { workspace_id: workspace_id },
+            }"
+          >
           </q-btn>
+          <q-btn
+            rounded
+            flat
+            dense
+            icon="save"
+            class="q-px-md"
+            @click="CopyWorkspaceUrl"
+          />
+          <q-btn
+            rounded
+            flat
+            dense
+            icon="disabled_visible"
+            class="q-px-md"
+            @click="ChangeViewMode"
+          />
         </div>
       </q-toolbar>
     </q-header>
@@ -68,43 +83,47 @@
       </q-card-actions>
     </q-card>
   </q-dialog>
-  <q-dialog v-model="a" :position="position">
-    <q-card style="width: 350px">
-      <q-linear-progress :value="0.6" color="pink" />
-
-      <q-card-section class="row items-center no-wrap">
-        <div>
-          <div class="text-weight-bold">The Walker</div>
-          <div class="text-grey">Fitz & The Tantrums</div>
-        </div>
-
-        <q-space />
-
-        <q-btn flat round icon="fast_rewind" />
-        <q-btn flat round icon="pause" />
-        <q-btn flat round icon="fast_forward" />
-      </q-card-section>
-    </q-card>
-  </q-dialog>
 </template>
 
 <script>
 import axios from "axios";
+import { copyToClipboard } from "quasar";
 
 export default {
   name: "PageHeader",
   data() {
     return {
+      workspace_id: this.$route.query?.workspace_id,
       newNote: false,
+      postitListDialog: false,
       content: "",
       title: "",
       color: "",
     };
   },
-  emits: ["success"],
+  watch: {
+    "$route.query.workspace_id": {
+      handler(workspace_id) {
+        this.workspace_id = workspace_id;
+      },
+      deep: true,
+      immediate: true,
+    },
+  },
+  emits: ["success", "viewMode"],
+  props: {
+    postitList: {
+      type: Array,
+      required: true,
+      default: () => [],
+    },
+  },
   methods: {
+    ChangeViewMode() {
+      this.$emit("viewMode");
+    },
     saveNewNote() {
-      const workspace_id = this.$route.query?.workspace_id;
+      const workspace_id = this.workspace_id;
       const params = {
         note: this.content,
         title: this.title,
@@ -114,7 +133,7 @@ export default {
       console.log(params);
       axios
         .get(
-          `http://127.0.0.1:5000/app/add`,
+          "http://127.0.0.1:5000/app/add",
           { params },
           { withCredentials: true }
         )
@@ -123,7 +142,7 @@ export default {
             this.newNote = false;
             this.content = "";
             this.title = "";
-            this.color = "";
+            this.color = "#cfc";
             this.$emit("success");
           }
         })
@@ -133,10 +152,27 @@ export default {
     },
     newNoteDialog() {
       console.log("here");
-      const colorList = ["#00BFB2", "#55dde0", "#8ac926", "#04395e", "#f26419"];
-      const colorId = Math.floor(Math.random() * 6);
+      const colorList = ["#cfc", "#ffc", "#ccf"];
+      const colorId = Math.floor(Math.random() * 3);
       this.color = colorList[colorId];
       this.newNote = true;
+    },
+    CopyWorkspaceUrl() {
+      const path = this.$route.fullPath;
+      const url = "http://localhost:8080" + path;
+      copyToClipboard(url)
+        .then(() => {
+          this.$swal.fire({
+            position: "bottom-end",
+            icon: "success",
+            title: "Your Workspace Link ,Copy to Clipboard",
+            showConfirmButton: false,
+            timer: 1500,
+          });
+        })
+        .catch(() => {
+          // fail
+        });
     },
   },
 };
@@ -153,8 +189,6 @@ export default {
     border: 2px solid #adb5bd;
     color: #adb5bd;
     font-weight: 700;
-    margin-left: 10vh;
-    margin-right: 10vh;
     margin-top: 5vh;
   }
 }
