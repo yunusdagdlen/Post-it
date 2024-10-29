@@ -26,13 +26,14 @@ def index():
 
 @mod_pages.route('/app')
 def index_app():
-    workspace_uuid = request.args.get('workspace_id')
-    mode = request.args.get('mode', '')
-    if not workspace_uuid:
-        workspace_uuid = WorkspaceUtils.create_workspace()
-
-    postits = WorkspaceUtils.get_workspace_notes(workspace_uuid=workspace_uuid, mode=mode)
-    return jsonify(postits)
+    # workspace_uuid = request.args.get('workspace_id')
+    # mode = request.args.get('mode', '')
+    # if not workspace_uuid:
+    #     workspace_uuid = WorkspaceUtils.create_workspace()
+    #
+    # postits = WorkspaceUtils.get_workspace_notes(workspace_uuid=workspace_uuid, mode=mode)
+    return render_template('app/index.html')
+    # return jsonify(postits)
 
 
 @mod_pages.route('/add', methods=['POST', 'GET'])
