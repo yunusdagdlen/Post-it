@@ -133,11 +133,7 @@ export default {
         note: this.note,
       };
       axios
-        .get(
-          `http://127.0.0.1:5000/app/edit-note`,
-          { params },
-          { withCredentials: true }
-        )
+        .get(`app/edit-note`, { params }, { withCredentials: true })
         .then((response) => {
           if (response.status === 200) {
             this.editNoteDialog = false;
@@ -155,11 +151,7 @@ export default {
         note_id: this.postit.uuid,
       };
       axios
-        .get(
-          `http://127.0.0.1:5000/app/delete-note/`,
-          { params },
-          { withCredentials: true }
-        )
+        .get(`app/delete-note/`, { params }, { withCredentials: true })
         .then((response) => {
           if (response.status === 200) {
             this.editNoteDialog = false;
@@ -177,11 +169,7 @@ export default {
         note_id: this.postit.uuid,
       };
       axios
-        .get(
-          `http://127.0.0.1:5000/app/disable-note/`,
-          { params },
-          { withCredentials: true }
-        )
+        .get(`app/disable-note/`, { params }, { withCredentials: true })
         .then((response) => {
           if (response.status === 200) {
             this.editNoteDialog = false;

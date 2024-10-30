@@ -9,7 +9,7 @@ from application.utils.workspace_utils import WorkspaceUtils
 
 
 @mod_pages.route('/')
-def index():
+def index_legacy():
     workspace_uuid = request.args.get('workspace_uuid')
     mode = request.args.get('mode', '')
     if not workspace_uuid:
@@ -24,15 +24,9 @@ def index():
     resp.set_cookie('workspace_uuid', workspace_uuid)
     return resp
 
-# @mod_pages.route('/app') # production build initial point
-    # workspace_uuid = request.args.get('workspace_id')
-    # mode = request.args.get('mode', '')
-    # if not workspace_uuid:
-    #     workspace_uuid = WorkspaceUtils.create_workspace()
-    #
-    # postits = WorkspaceUtils.get_workspace_notes(workspace_uuid=workspace_uuid, mode=mode)
-    # return render_template('app/index.html')
-    # return jsonify(postits)
+@mod_pages.route('/app') # production build initial point
+def index():
+    return render_template('app/index.html')
 
 
 @mod_pages.route('/add', methods=['POST', 'GET'])
@@ -123,10 +117,8 @@ def get_single_note_detail(uuid):
     return jsonify(note)
 
 
-
-
-@mod_pages.route('/app')
-def index_app():
+@mod_pages.route('/app/list_postits', methods=['GET'])
+def list_postits_app():
     workspace_uuid = request.args.get('workspace_id')
     mode = request.args.get('mode', '')
     response={}
@@ -135,6 +127,7 @@ def index_app():
     else:
         response['postits'] = WorkspaceUtils.get_workspace_notes(workspace_uuid=workspace_uuid, mode=mode)
     return jsonify(response)
+
 
 @mod_pages.route('/app/add', methods=['GET'])
 def add_note_app():

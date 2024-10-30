@@ -132,11 +132,7 @@ export default {
       };
       console.log(params);
       axios
-        .get(
-          "http://127.0.0.1:5000/app/add",
-          { params },
-          { withCredentials: true }
-        )
+        .get("app/add", { params }, { withCredentials: true })
         .then((response) => {
           if (response.status === 200) {
             this.newNote = false;

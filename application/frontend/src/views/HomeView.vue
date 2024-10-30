@@ -45,7 +45,7 @@ export default {
       const workspace_id = this.$route.query?.workspace_id;
       const params = { workspace_id: workspace_id, mode: this.viewMode };
       axios
-        .get(`http://127.0.0.1:5000/app`, { params }, { withCredentials: true })
+        .get(`app/list_postits`, { params }, { withCredentials: true })
         .then((response) => {
           if (response.status === 200) {
             this.postitList = response.data.postits;
