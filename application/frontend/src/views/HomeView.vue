@@ -10,7 +10,6 @@
         :postitList="this.postitList"
       />
     </div>
-
     <div
       class="row q-col-gutter-lg"
       style="display: flex; align-items: baseline; justify-content: center"
@@ -27,6 +26,7 @@
 import PageHeader from "@/components/PageHeader.vue";
 import axios from "axios";
 import PostitCard from "@/components/PostitCard.vue";
+import { mapGetters } from "vuex";
 
 export default {
   name: "HomeView",
@@ -68,6 +68,9 @@ export default {
       }
       this.fetchAllNotes();
     },
+  },
+  computed: {
+    ...mapGetters(["baseUrl"]),
   },
   mounted() {
     this.fetchAllNotes();
