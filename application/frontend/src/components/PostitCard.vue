@@ -19,7 +19,7 @@
       <!--default view -->
       <q-card-section>
         <div class="row">
-          <div class="text-h6 text-black col-9" style="word-break: break-all">
+          <div class="text-h6 text-black col-9" style="word-break: break-word">
             {{ this.title }}
           </div>
           <q-space />
