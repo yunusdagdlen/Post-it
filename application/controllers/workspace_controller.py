@@ -46,7 +46,6 @@ def add_note():
         abort(make_response("Not Found", 404))
 
 
-
 @mod_pages.route('/edit-note/', methods=['POST', 'GET'])
 def edit_note():
     if request.method == 'POST':

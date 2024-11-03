@@ -138,7 +138,7 @@ export default {
             this.newNote = false;
             this.content = "";
             this.title = "";
-            this.color = "#cfc";
+            this.color = "#29bf12";
             this.$emit("success");
           }
         })
@@ -147,9 +147,8 @@ export default {
         });
     },
     newNoteDialog() {
-      console.log("here");
-      const colorList = ["#cfc", "#ffc", "#ccf"];
-      const colorId = Math.floor(Math.random() * 3);
+      const colorList = ["#29bf12", "#abff4f", "#08bdbd", "#ff9914"];
+      const colorId = Math.floor(Math.random() * 4);
       this.color = colorList[colorId];
       this.newNote = true;
     },
