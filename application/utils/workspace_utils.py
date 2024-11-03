@@ -85,7 +85,7 @@ class WorkspaceUtils:
         mode = bleach.clean(mode)
         workspace_rec = WorkSpaces.query.filter_by(uuid=workspace_uuid).first()
         if workspace_rec:
-            postit_query = Postit.query.filter_by(workspace_id=workspace_rec.id, is_deleted=False)
+            postit_query = Postit.query.filter(Postit.workspace_id==workspace_rec.id, Postit.is_deleted.isnot(True))
             if mode == 'active':
                 postit_query = postit_query.filter(Postit.active == True)
             elif mode == 'deactive':
