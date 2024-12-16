@@ -82,7 +82,7 @@
     </q-card>
   </div>
 
-  <q-dialog @hide="editNote" v-model="editNoteDialog">
+  <q-dialog v-model="editNoteDialog">
     <q-card
       style="color: black; width: 90vh; min-height: 220px; border-radius: 15px"
       :style="{ background: postit?.extra_info?.postit_color }"
@@ -102,6 +102,10 @@
           />
         </div>
       </q-card-section>
+      <q-card-actions class="q-pr-md q-pt-none">
+        <q-space />
+        <q-btn @click="editNote" label="Save" color="grey-7" outline />
+      </q-card-actions>
     </q-card>
   </q-dialog>
 </template>
