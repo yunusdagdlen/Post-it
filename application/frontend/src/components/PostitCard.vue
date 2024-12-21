@@ -111,6 +111,8 @@
 </template>
 <script>
 import axios from "axios";
+axios.defaults.baseURL = "https://notedflow.com";
+//axios.defaults.baseURL = "http://127.0.0.1:5000";
 
 export default {
   data() {
@@ -141,10 +143,7 @@ export default {
         note: this.note,
       };
       axios
-        .get(
-          `https://notedflow.com/app/edit-note`, // quick fix should be replaced in a short time period
-          { params },
-          { withCredentials: true }
+        .get(`app/edit-note`, { params }, { withCredentials: true }
         )
         .then((response) => {
           if (response.status === 200) {
