@@ -104,7 +104,7 @@
       </q-card-section>
       <q-card-actions class="q-pr-md q-pt-none">
         <q-space />
-        <q-btn @click="editNote" label="Save" color="grey-7" outline />
+        <q-btn @click="editNote" label="Save" color="black" outline />
       </q-card-actions>
     </q-card>
   </q-dialog>
