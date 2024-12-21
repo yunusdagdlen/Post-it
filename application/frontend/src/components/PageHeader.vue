@@ -89,7 +89,7 @@
 import axios from "axios";
 import { copyToClipboard } from "quasar";
 
-axios.defaults.baseURL = "https://notedflow.com";
+//axios.defaults.baseURL = "https://notedflow.com";
 //axios.defaults.baseURL = "http://127.0.0.1:5000";
 
 export default {

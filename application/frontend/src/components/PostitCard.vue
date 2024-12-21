@@ -111,8 +111,8 @@
 </template>
 <script>
 import axios from "axios";
-axios.defaults.baseURL = "https://notedflow.com";
-//axios.defaults.baseURL = "http://127.0.0.1:5000";
+// axios.defaults.baseURL = "https://notedflow.com";
+// axios.defaults.baseURL = "http://127.0.0.1:5000";
 
 export default {
   data() {
@@ -136,15 +136,17 @@ export default {
   methods: {
     editNote() {
       const workspace_id = this.$route.query?.workspace_id;
-      const params = {
-        workspace_id: workspace_id,
-        note_id: this.postit.uuid,
-        title: this.title,
-        note: this.note,
-      };
+
+      // Create form data
+      const formData = new FormData();
+      formData.append("workspace_id", workspace_id);
+      formData.append("note_id", this.postit.uuid);
+      formData.append("title", this.title);
+      formData.append("note", this.note);
+
+      // Axios POST request
       axios
-        .get(`app/edit-note`, { params }, { withCredentials: true }
-        )
+        .post(`edit-note`, formData, { withCredentials: true })
         .then((response) => {
           if (response.status === 200) {
             this.editNoteDialog = false;
@@ -155,6 +157,7 @@ export default {
           console.log(error);
         });
     },
+
     deleteNote() {
       const workspace_id = this.$route.query?.workspace_id;
       const params = {

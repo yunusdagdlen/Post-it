@@ -37,13 +37,15 @@ def add_note():
 @mod_pages.route('/edit-note/', methods=['POST', 'GET'])
 def edit_note():
     if request.method == 'POST':
-        title = request.form.get('edited_title', '')
-        note = request.form.get('edited_note', '')
-        uuid = request.form.get('hidden_uuid')
-        workspace_uuid = request.cookies.get('workspace_uuid')
+        title = request.form.get('title', '')
+        note = request.form.get('note', '')
+        uuid = request.form.get('note_id')
+        workspace_uuid = request.form.get('workspace_id')
         if title or note:
             title = bleach.clean(title)
             note = bleach.clean(note)
+            title = title.replace('&amp;', '&')
+            note = note.replace('&amp;', '&')
             WorkspaceUtils.edit_note(title, note, uuid, workspace_uuid)
             return redirect(url_for('pages.index'))
         else:
@@ -125,6 +127,8 @@ def add_note_app():
     if workspace_id and title or note:
         title = bleach.clean(title)
         note = bleach.clean(note)
+        title = title.replace('&amp;', '&')
+        note = note.replace('&amp;', '&')
         workspace_id = bleach.clean(workspace_id)
         response = WorkspaceUtils.add_note(title, note, workspace_id,color)
         return jsonify(response)
