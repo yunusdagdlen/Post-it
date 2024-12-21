@@ -19,7 +19,7 @@
       <!--default view -->
       <q-card-section>
         <div class="row">
-          <div class="text-h6 text-black col-9" style="word-break: break-word">
+          <div class="text-h6 text-black col-9" style="word-break: auto-phrase">
             {{ this.title }}
           </div>
           <q-space />
@@ -141,7 +141,11 @@ export default {
         note: this.note,
       };
       axios
-        .get(`app/edit-note`, { params }, { withCredentials: true })
+        .get(
+          `https://notedflow.com/app/edit-note`, // quick fix should be replaced in a short time period
+          { params },
+          { withCredentials: true }
+        )
         .then((response) => {
           if (response.status === 200) {
             this.editNoteDialog = false;
