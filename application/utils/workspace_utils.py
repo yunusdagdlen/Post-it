@@ -44,6 +44,7 @@ class WorkspaceUtils:
         workspace_edit = Postit.query.filter_by(uuid=note_id, workspace_id=workspace_rec.id).first()
         workspace_edit.title = title
         workspace_edit.note = note
+        workspace_edit.active = True
         try:
             db.session.commit()
             response['is_success'] = True

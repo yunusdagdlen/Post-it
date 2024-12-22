@@ -11,16 +11,15 @@
       "
       @click="showNote = !this.showNote"
       :style="{
-        background: postit?.extra_info?.postit_color
-          ? postit?.extra_info?.postit_color
-          : '#59a5d8',
+        background: postit?.extra_info?.postit_color ? postit?.extra_info?.postit_color : '#59a5d8',
+        opacity: this.active ? 1 : 0.5
       }"
     >
       <!--default view -->
       <q-card-section>
         <div class="row">
           <div class="text-h6 text-black col-9" style="word-break: auto-phrase">
-            {{ this.title }}
+            {{ this.title }} {{this.active}}
           </div>
           <q-space />
           <div
@@ -120,6 +119,7 @@ export default {
       editNoteDialog: false,
       title: this.postit.title,
       note: this.postit.note,
+      active: this.postit.active,
       notes_by_line: this.postit.notes_by_line,
       showNote: false,
       menuButton: false,
