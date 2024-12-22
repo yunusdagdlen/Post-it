@@ -103,7 +103,7 @@
       </q-card-section>
       <q-card-actions class="q-pr-md q-pt-none">
         <q-space />
-        <q-btn @click="editNote" label="Save" color="black" outline />
+        <q-btn @click="deleteNote" label="Save" color="black" outline />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -143,6 +143,7 @@ export default {
       formData.append("note_id", this.postit.uuid);
       formData.append("title", this.title);
       formData.append("note", this.note);
+
 
       // Axios POST request
       axios
