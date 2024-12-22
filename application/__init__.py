@@ -23,6 +23,9 @@ def create_app():
     db.app = app
     db.init_app(app)
 
+    # session secret key
+    app.secret_key = '05586b38ce2dc8b4b4e74fa770006e4ed2eac64165dfb33474cbebdf067bbffa'
+
     # configure migrations
     migrate.init_app(app, db)
 

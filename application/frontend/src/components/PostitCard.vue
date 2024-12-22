@@ -19,7 +19,7 @@
       <q-card-section>
         <div class="row">
           <div class="text-h6 text-black col-9" style="word-break: auto-phrase">
-            {{ this.title }} {{this.active}}
+            {{ this.title }}
           </div>
           <q-space />
           <div
@@ -160,23 +160,30 @@ export default {
     // },
     editSingleNote() {
       const workspace_id = this.$route.query?.workspace_id;
-      const params = {
+      // const params = {
+      //   workspace_id: workspace_id,
+      //   note_id: this.postit.uuid,
+      //   title: this.title,
+      //   note: this.note,
+      // };
+      const params = new URLSearchParams({
         workspace_id: workspace_id,
         note_id: this.postit.uuid,
         title: this.title,
-        note: this.note,
-      };
-      axios
-          .get(`app/edit-note`, { params }, { withCredentials: true })
-          .then((response) => {
-            if (response.status === 200) {
-              this.editNoteDialog = false;
-              this.$emit("ok");
-            }
-          })
-          .catch((error) => {
-            console.log(error);
-          });
+        note: this.note
+      });
+      window.location.href = `edit-note?${params.toString()}`;
+      // axios
+      //     .get(`app/edit-note`, { params }, { withCredentials: true })
+      //     .then((response) => {
+      //       if (response.status === 200) {
+      //         this.editNoteDialog = false;
+      //         this.$emit("ok");
+      //       }
+      //     })
+      //     .catch((error) => {
+      //       console.log(error);
+      //     });
     },
 
     deleteNote() {

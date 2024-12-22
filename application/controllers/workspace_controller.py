@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) 2022 Post-it
 import bleach
-from flask import render_template, request, redirect, url_for, abort, make_response, jsonify
+from flask import render_template, request, redirect, url_for, abort, make_response, jsonify, session
+
 from application.controller import mod_pages
-from application.utils.notes_utils import SingleNoteUtils
 from application.utils.workspace_utils import WorkspaceUtils
 
 
@@ -14,22 +14,29 @@ def index_legacy():
 
 @mod_pages.route('/app') # production build initial point
 def index():
+    workspace_id = request.args.get('workspace_id')
+    if workspace_id:
+        session['workspace_id'] = workspace_id
     return render_template('app/index.html')
 
 
-@mod_pages.route('/edit-note/', methods=['POST', 'GET'])
+@mod_pages.route('/edit-note', methods=['POST', 'GET'])
 def edit_note():
-    if request.method == 'POST':
-        title = request.form.get('title', '')
-        note = request.form.get('note', '')
-        uuid = request.form.get('note_id')
-        workspace_uuid = request.form.get('workspace_id')
+    if request.method == 'GET':
+        title = request.args.get('title', '')
+        note = request.args.get('note', '')
+        uuid = request.args.get('note_id')
+        workspace_uuid = request.args.get('workspace_id')
         if title or note:
             title = bleach.clean(title)
             note = bleach.clean(note)
             title = title.replace('&amp;', '&')
             note = note.replace('&amp;', '&')
-            return WorkspaceUtils.edit_note(title, note, uuid, workspace_uuid)
+            respnse = WorkspaceUtils.edit_note(title, note, uuid, workspace_uuid)
+            if respnse['is_success']:
+                return redirect(f'/app?workspace_id={workspace_uuid}')
+            else:
+                'hata sayfası'
         else:
             return 'hata sayfası'
     else:
@@ -46,6 +53,9 @@ def list_postits_app():
     workspace_uuid = request.args.get('workspace_id')
     mode = request.args.get('mode', '')
     response={}
+    if not workspace_uuid:
+        workspace_uuid = session.get('workspace_id')
+
     if not workspace_uuid:
         response['workspace_id'] = WorkspaceUtils.create_workspace()
     else:
