@@ -103,7 +103,7 @@
       </q-card-section>
       <q-card-actions class="q-pr-md q-pt-none">
         <q-space />
-        <q-btn @click="deleteNote" label="Save" color="black" outline />
+        <q-btn @click="editSingleNote" label="Save" color="black" outline />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -134,29 +134,49 @@ export default {
   },
   emits: ["ok"],
   methods: {
-    editNote() {
+    // editNote() {
+    //   const workspace_id = this.$route.query?.workspace_id;
+    //
+    //   // Create form data
+    //   const formData = new FormData();
+    //   formData.append("workspace_id", workspace_id);
+    //   formData.append("note_id", this.postit.uuid);
+    //   formData.append("title", this.title);
+    //   formData.append("note", this.note);
+    //
+    //
+    //   // Axios POST request
+    //   axios
+    //     .post(`edit-note`, formData, { withCredentials: true })
+    //     .then((response) => {
+    //       if (response.status === 200) {
+    //         this.editNoteDialog = false;
+    //         this.$emit("ok");
+    //       }
+    //     })
+    //     .catch((error) => {
+    //       console.log(error);
+    //     });
+    // },
+    editSingleNote() {
       const workspace_id = this.$route.query?.workspace_id;
-
-      // Create form data
-      const formData = new FormData();
-      formData.append("workspace_id", workspace_id);
-      formData.append("note_id", this.postit.uuid);
-      formData.append("title", this.title);
-      formData.append("note", this.note);
-
-
-      // Axios POST request
+      const params = {
+        workspace_id: workspace_id,
+        note_id: this.postit.uuid,
+        title: this.title,
+        note: this.note,
+      };
       axios
-        .post(`edit-note`, formData, { withCredentials: true })
-        .then((response) => {
-          if (response.status === 200) {
-            this.editNoteDialog = false;
-            this.$emit("ok");
-          }
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+          .get(`app/edit-note`, { params }, { withCredentials: true })
+          .then((response) => {
+            if (response.status === 200) {
+              this.editNoteDialog = false;
+              this.$emit("ok");
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+          });
     },
 
     deleteNote() {
