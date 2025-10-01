@@ -22,7 +22,7 @@ class WorkspaceUtils:
         workspace_record = WorkSpaces.query.filter_by(uuid=workspace_id).first()
         if workspace_record:
             if unique_id:
-                extra_info = {'postit_color': color}
+                extra_info = {'postit_color': color, 'created_at': datetime.utcnow().isoformat()}
                 new_note = Postit(title=title,
                                   note=note,
                                   uuid=unique_id,

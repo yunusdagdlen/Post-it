@@ -76,6 +76,7 @@
             <span style="white-space: pre-line">{{ note }}</span>
             <hr />
           </template>
+          <div v-if="formattedCreatedAt" class="created-at text-black">{{ formattedCreatedAt }}</div>
         </q-card-section>
       </template>
     </q-card>
@@ -133,6 +134,17 @@ export default {
     },
   },
   emits: ["ok"],
+  computed: {
+    formattedCreatedAt() {
+      try {
+        const iso = this.postit && this.postit.extra_info ? this.postit.extra_info.created_at : null;
+        if (!iso) return '';
+        const d = new Date(iso);
+        if (isNaN(d.getTime())) return '';
+        return `${d.toLocaleDateString()} ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+      } catch (e) { return ''; }
+    }
+  },
   methods: {
     // editNote() {
     //   const workspace_id = this.$route.query?.workspace_id;
@@ -257,5 +269,11 @@ export default {
   height: 1px;
   background: rgba(0, 0, 0, 0.08);
   margin: 6px 0;
+}
+.created-at {
+  font-size: 11px;
+  opacity: 0.7;
+  margin-top: 8px;
+  text-align: right;
 }
 </style>

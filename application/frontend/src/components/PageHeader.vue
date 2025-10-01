@@ -7,7 +7,7 @@
             style="text-decoration: none; color: #adb5bd"
             :to="{ path: 'app', query: { workspace_id: workspace_id } }"
           >
-            NotedFlow
+            {{ headerTitle }}
           </router-link>
         </q-toolbar-title>
         <div class="q-mr-md">
@@ -87,7 +87,7 @@
   </div>
 
   <q-dialog v-model="newNote" transition-show="jump-down" transition-hide="jump-up">
-    <q-card class="modal-card new-note-card" :style="{ '--accent': color }">
+    <q-card ref="newNoteCard" class="modal-card new-note-card" :style="{ '--accent': color }">
       <div class="modal-accent" :style="{ background: color }"></div>
       <q-card-section class="modal-header">
         <div class="row items-center no-wrap justify-between">
@@ -101,10 +101,11 @@
         </div>
       </q-card-section>
       <q-card-section class="q-pt-sm">
-        <q-input v-model="title" label="Title" filled standout="bg-grey-2 text-dark" dense autofocus />
+        <q-input ref="titleInput" v-model="title" label="Title" filled standout="bg-grey-2 text-dark" dense autofocus />
       </q-card-section>
       <q-card-section class="q-pt-none">
         <q-input
+          ref="contentInput"
           v-model="content"
           label="Write your note..."
           filled
@@ -113,6 +114,28 @@
           autogrow
         />
       </q-card-section>
+
+      <!-- Color picker: preset swatches -->
+      <q-card-section class="q-pt-none q-px-md">
+        <div class="text-caption text-grey-7 q-mb-sm">Color</div>
+        <div class="row items-center q-gutter-sm">
+          <div
+            v-for="c in presetColors"
+            :key="c"
+            class="color-swatch"
+            :style="{ background: c, outlineColor: c }"
+            :aria-label="'Select color ' + c"
+            :class="{ selected: color === c }"
+            role="button"
+            tabindex="0"
+            @click="color = c"
+            @keydown.enter.prevent="color = c"
+          >
+            <q-icon v-if="color === c" name="check" color="white" size="16px" />
+          </div>
+        </div>
+      </q-card-section>
+
       <q-card-actions align="right" class="q-pa-md">
         <q-btn flat color="grey-7" label="Cancel" v-close-popup />
         <q-btn unelevated color="primary" label="Save" icon="save" @click="saveNewNote()" />
@@ -138,6 +161,7 @@ export default {
       content: "",
       title: "",
       color: "",
+      presetColors: ["#29bf12", "#abff4f", "#08bdbd", "#ff9914", "#4dabf7", "#845ef7", "#e64980", "#ffa94d"],
       currentMode: 'active',
     };
   },
@@ -174,6 +198,11 @@ export default {
     },
     viewToggleAria() {
       return this.viewToggleTooltip;
+    },
+    headerTitle() {
+      const p = this.$route && this.$route.path ? this.$route.path : '';
+      // Show 'Home' when on main board (/app); otherwise keep brand name
+      return (p.includes('note-list')) ? 'NotedFlow' : 'Home';
     }
   },
   methods: {
@@ -199,6 +228,19 @@ export default {
       }
     },
     saveNewNote() {
+      const t = (this.title || '').trim();
+      const c = (this.content || '').trim();
+
+      // Validate required fields: Title and Content
+      if (!t || !c) {
+        const which = !t ? 'title' : 'content';
+        const msg = !t && !c
+          ? 'Please enter a title and some content before saving.'
+          : (!t ? 'Please enter a title before saving.' : 'Please enter some content before saving.');
+        this.vibrateAndWarn(msg, which);
+        return;
+      }
+
       const workspace_id = this.workspace_id;
       const params = {
         note: this.content,
@@ -206,7 +248,6 @@ export default {
         color: this.color,
         workspace_id: workspace_id,
       };
-      console.log(params);
       axios
         .get("app/add", { params }, { withCredentials: true })
         .then((response) => {
@@ -221,6 +262,47 @@ export default {
         .catch((error) => {
           console.log(error);
         });
+    },
+    vibrateAndWarn(message, whichField) {
+      try {
+        if (navigator && typeof navigator.vibrate === 'function') {
+          navigator.vibrate([60, 40, 60]);
+        }
+      } catch (e) { /* ignore */ }
+
+      // visual feedback: shake modal
+      this.triggerShake();
+
+      // focus the missing field
+      this.$nextTick(() => {
+        if (whichField === 'title' && this.$refs.titleInput) {
+          this.$refs.titleInput.focus();
+        } else if (whichField === 'content' && this.$refs.contentInput) {
+          this.$refs.contentInput.focus();
+        }
+      });
+
+      // show warning toast/dialog
+      if (this.$swal && typeof this.$swal.fire === 'function') {
+        this.$swal.fire({
+          icon: 'warning',
+          title: 'Missing information',
+          text: message,
+          timer: 1800,
+          showConfirmButton: false,
+          position: 'bottom-end'
+        });
+      }
+    },
+    triggerShake() {
+      const card = this.$refs.newNoteCard && this.$refs.newNoteCard.$el ? this.$refs.newNoteCard.$el : (this.$refs.newNoteCard || null);
+      if (!card) return;
+      card.classList.remove('shake');
+      // Force reflow to restart animation
+      void card.offsetWidth;
+      card.classList.add('shake');
+      // Remove class after animation ends (fallback in case animationend not fired)
+      setTimeout(() => card.classList.remove('shake'), 400);
     },
     newNoteDialog() {
       const colorList = ["#29bf12", "#abff4f", "#08bdbd", "#ff9914"];
@@ -373,5 +455,39 @@ export default {
 
 .modal-card .q-textarea .q-field__native {
   min-height: 120px;
+}
+
+/* Color swatch styles */
+.color-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  box-shadow: 0 0 0 2px #fff inset, 0 2px 6px rgba(0,0,0,0.15);
+  outline: 2px solid transparent;
+}
+.color-swatch:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 2px #fff inset, 0 4px 10px rgba(0,0,0,0.18);
+}
+.color-swatch.selected {
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.9) inset, 0 0 0 3px rgba(0,0,0,0.08), 0 6px 14px rgba(0,0,0,0.18);
+}
+</style>
+
+
+<style scoped>
+@keyframes shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-4px); }
+  40%, 60% { transform: translateX(4px); }
+}
+.modal-card.shake {
+  animation: shake 300ms ease-in-out;
 }
 </style>
