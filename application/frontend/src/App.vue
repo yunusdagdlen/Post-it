@@ -21,6 +21,11 @@ export default {
 </script>
 
 <style>
+html, body, #app {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif;
+}
+* { font-family: inherit; }
+
 .app-layout {
   background: linear-gradient(135deg, #f7f9fc 0%, #eef2f7 100%);
   min-height: 100vh;

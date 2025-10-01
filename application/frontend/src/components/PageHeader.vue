@@ -17,77 +17,105 @@
             dense
             icon="mdi-pencil-plus-outline"
             class="q-px-md"
+            aria-label="Add note"
             @click="newNoteDialog"
-          />
-          <q-btn
-            rounded
-            flat
-            dense
-            icon="list"
-            class="q-px-md"
-            :to="{
-              path: 'note-list',
-              query: { workspace_id: workspace_id },
-            }"
           >
+            <q-tooltip anchor="bottom middle" self="top middle" class="bg-grey-9 text-white">Add note</q-tooltip>
           </q-btn>
           <q-btn
             rounded
             flat
             dense
-            icon="save"
+            :icon="viewToggleIcon"
             class="q-px-md"
+            :aria-label="viewToggleAria"
+            @click="toggleView"
+          >
+            <q-tooltip anchor="bottom middle" self="top middle" class="bg-grey-9 text-white">{{ viewToggleTooltip }}</q-tooltip>
+          </q-btn>
+          <q-btn
+            rounded
+            flat
+            dense
+            icon="link"
+            class="q-px-md"
+            aria-label="Copy workspace link"
             @click="CopyWorkspaceUrl"
-          />
+          >
+            <q-tooltip anchor="bottom middle" self="top middle" class="bg-grey-9 text-white">Copy workspace link</q-tooltip>
+          </q-btn>
+          <q-btn-dropdown
+            rounded
+            flat
+            dense
+            icon="filter_alt"
+            class="q-px-md"
+            aria-label="Filter"
+            content-class="viewmode-menu"
+          >
+            <q-list style="min-width: 140px">
+              <q-item clickable v-close-popup @click="setViewMode('active')">
+                <q-item-section avatar><q-icon name="check_circle" :color="currentMode==='active' ? 'primary' : 'grey-5'" /></q-item-section>
+                <q-item-section>Active</q-item-section>
+              </q-item>
+              <q-item clickable v-close-popup @click="setViewMode('deactive')">
+                <q-item-section avatar><q-icon name="block" :color="currentMode==='deactive' ? 'primary' : 'grey-5'" /></q-item-section>
+                <q-item-section>Deactive</q-item-section>
+              </q-item>
+              <q-separator spaced inset />
+              <q-item clickable v-close-popup @click="setViewMode('all')">
+                <q-item-section avatar><q-icon name="layers" :color="currentMode==='all' ? 'primary' : 'grey-5'" /></q-item-section>
+                <q-item-section>All</q-item-section>
+              </q-item>
+            </q-list>
+            <q-tooltip anchor="bottom middle" self="top middle" class="bg-grey-9 text-white">Filter</q-tooltip>
+          </q-btn-dropdown>
           <q-btn
             rounded
             flat
             dense
-            icon="disabled_visible"
+            icon="restart_alt"
             class="q-px-md"
-            @click="ChangeViewMode"
-          />
-          <q-btn
-            rounded
-            flat
-            dense
-            icon="logout"
-            class="q-px-md"
+            aria-label="Reset workspace"
             @click="resetWorkspace"
-          />
+          >
+            <q-tooltip anchor="bottom middle" self="top middle" class="bg-grey-9 text-white">Reset workspace</q-tooltip>
+          </q-btn>
         </div>
       </q-toolbar>
     </div>
   </div>
 
-  <q-dialog v-model="newNote">
-    <q-card
-      style="color: black; width: 90vh; min-height: 220px; border-radius: 15px"
-      :style="{ background: this.color }"
-    >
-      <q-card-section>
-        <div class="row full-width">
-          <q-input v-model="title" label="Title" class="full-width" />
+  <q-dialog v-model="newNote" transition-show="jump-down" transition-hide="jump-up">
+    <q-card class="modal-card new-note-card" :style="{ '--accent': color }">
+      <div class="modal-accent" :style="{ background: color }"></div>
+      <q-card-section class="modal-header">
+        <div class="row items-center no-wrap justify-between">
+          <div class="row items-center no-wrap">
+            <q-avatar size="28px" class="q-mr-sm" :style="{ background: color }">
+              <q-icon name="mdi-pencil-plus-outline" color="white" size="18px" />
+            </q-avatar>
+            <div class="text-subtitle1 text-weight-medium">Add note</div>
+          </div>
+          <q-btn flat round dense icon="close" v-close-popup />
         </div>
       </q-card-section>
-      <q-card-section class="q-pt-none text-black">
-        <div class="full-width">
-          <q-input
-            v-model="content"
-            outlined
-            type="textarea"
-            style="min-height: 100px !important"
-          />
-        </div>
+      <q-card-section class="q-pt-sm">
+        <q-input v-model="title" label="Title" filled standout="bg-grey-2 text-dark" dense autofocus />
+      </q-card-section>
+      <q-card-section class="q-pt-none">
+        <q-input
+          v-model="content"
+          label="Write your note..."
+          filled
+          standout="bg-grey-2 text-dark"
+          type="textarea"
+          autogrow
+        />
       </q-card-section>
       <q-card-actions align="right" class="q-pa-md">
-        <q-btn
-          outline
-          color="grey-6"
-          label="Save"
-          icon="save"
-          @click="saveNewNote()"
-        />
+        <q-btn flat color="grey-7" label="Cancel" v-close-popup />
+        <q-btn unelevated color="primary" label="Save" icon="save" @click="saveNewNote()" />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -110,6 +138,7 @@ export default {
       content: "",
       title: "",
       color: "",
+      currentMode: 'active',
     };
   },
   watch: {
@@ -121,7 +150,7 @@ export default {
       immediate: true,
     },
   },
-  emits: ["success", "viewMode"],
+  emits: ["success", "filter", "viewMode"],
   props: {
     postitList: {
       type: Array,
@@ -129,9 +158,45 @@ export default {
       default: () => [],
     },
   },
+  computed: {
+    viewModeLabel() {
+      const map = { active: 'Active', deactive: 'Deactive', disabled: 'Deactive', all: 'All' };
+      return map[this.currentMode] || 'Active';
+    },
+    isListView() {
+      return this.$route.path && this.$route.path.includes('note-list');
+    },
+    viewToggleIcon() {
+      return this.isListView ? 'dashboard' : 'view_list';
+    },
+    viewToggleTooltip() {
+      return this.isListView ? 'Switch to board view' : 'Switch to list view';
+    },
+    viewToggleAria() {
+      return this.viewToggleTooltip;
+    }
+  },
   methods: {
     ChangeViewMode() {
+      // Backward compatibility: emit without parameter (parent may ignore)
+      this.$emit("filter");
       this.$emit("viewMode");
+    },
+    setViewMode(mode) {
+      this.currentMode = mode;
+      // Emit new event name and legacy one for compatibility
+      this.$emit('filter', mode);
+      this.$emit('viewMode', mode);
+    },
+    toggleView() {
+      const wid = this.$route.query?.workspace_id || this.workspace_id;
+      if (this.isListView) {
+        // Go to board view
+        this.$router.push({ path: 'app', query: { workspace_id: wid } });
+      } else {
+        // Go to list view
+        this.$router.push({ path: 'note-list', query: { workspace_id: wid } });
+      }
     },
     saveNewNote() {
       const workspace_id = this.workspace_id;
@@ -164,21 +229,39 @@ export default {
       this.newNote = true;
     },
     CopyWorkspaceUrl() {
-      const path = this.$route.fullPath;
-      const url = "http://localhost:8080" + path;
-      copyToClipboard(url)
-        .then(() => {
-          this.$swal.fire({
-            position: "bottom-end",
-            icon: "success",
-            title: "Your Workspace Link ,Copy to Clipboard",
-            showConfirmButton: false,
-            timer: 1500,
-          });
-        })
-        .catch(() => {
-          // fail
-        });
+      try {
+        const wid = this.$route.query?.workspace_id || this.workspace_id;
+        if (wid) {
+          const resolved = this.$router.resolve({ path: '/app', query: { workspace_id: wid } });
+          const url = window.location.origin + resolved.href;
+          copyToClipboard(url)
+            .then(() => {
+              this.$swal.fire({
+                position: "bottom-end",
+                icon: "success",
+                title: "Workspace link copied.",
+                showConfirmButton: false,
+                timer: 1500,
+              });
+            })
+            .catch(() => {});
+        } else {
+          // Fallback: copy current URL if workspace id not yet available
+          copyToClipboard(window.location.href)
+            .then(() => {
+              this.$swal.fire({
+                position: "bottom-end",
+                icon: "success",
+                title: "Current link copied.",
+                showConfirmButton: false,
+                timer: 1500,
+              });
+            })
+            .catch(() => {});
+        }
+      } catch (e) {
+        // silent
+      }
     },
     resetWorkspace() {
       const currentUrl = window.location.href;
@@ -253,7 +336,42 @@ export default {
 }
 
 .HeaderToolbar .q-btn {
-  margin-left: 6px;
-  margin-right: 6px;
+  margin-left: 2px;
+  margin-right: 2px;
+}
+
+/* Modern modal styles */
+.modal-card {
+  width: 90vw;
+  max-width: 720px;
+  color: #1f2d3d;
+  border-radius: 18px;
+  box-shadow: 0 20px 50px rgba(31, 45, 61, 0.18);
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.new-note-card {
+  position: relative;
+}
+
+.modal-accent {
+  height: 4px;
+  width: 100%;
+  background: #4dabf7;
+}
+
+.modal-header {
+  padding-top: 14px;
+  padding-bottom: 8px;
+}
+
+/* Input tweaks inside modals */
+.modal-card .q-field--filled .q-field__control {
+  border-radius: 12px;
+}
+
+.modal-card .q-textarea .q-field__native {
+  min-height: 120px;
 }
 </style>

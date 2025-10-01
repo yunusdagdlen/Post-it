@@ -87,10 +87,14 @@ class WorkspaceUtils:
         workspace_rec = WorkSpaces.query.filter_by(uuid=workspace_uuid).first()
         if workspace_rec:
             postit_query = Postit.query.filter(Postit.workspace_id==workspace_rec.id, Postit.is_deleted.isnot(True))
+            # Support new and legacy mode names
             if mode == 'active':
                 postit_query = postit_query.filter(Postit.active == True)
-            elif mode == 'deactive':
+            elif mode in ('disabled', 'deactive'):
                 postit_query = postit_query.filter(Postit.active == False)
+            elif mode == 'all' or mode == '' or mode == 'default':
+                pass  # no additional filter
+            # any other mode: default to all
 
             postits_records = postit_query.all()
             for rec in postits_records:

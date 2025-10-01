@@ -72,7 +72,7 @@ function get_workspace_func() {
     Swal.fire({
         position: 'center',
         icon: 'success',
-        title: 'Your Workspace Link ,Copy to Clipboard',
+        title: 'Workspace link copied.',
         showConfirmButton: false,
         timer: 1500
     })
