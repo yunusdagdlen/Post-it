@@ -114,3 +114,8 @@ def disable_note_app():
         if response['is_success']:
             return jsonify(response)
 
+@mod_pages.route('/app/clear-workspace', methods=['GET', 'POST'])
+def clear_workspace():
+    session.pop('workspace_id', None)
+    return jsonify({'is_success': True})
+

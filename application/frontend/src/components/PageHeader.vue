@@ -1,6 +1,6 @@
 <template class="">
   <div class="PageHeader">
-    <div class="HeaderToolbar q-mx-xl bordered bg-white">
+    <div class="HeaderToolbar bordered bg-white">
       <q-toolbar class="q-px-xl rounded bordered">
         <q-toolbar-title class="text-weight-medium">
           <router-link
@@ -46,6 +46,14 @@
             icon="disabled_visible"
             class="q-px-md"
             @click="ChangeViewMode"
+          />
+          <q-btn
+            rounded
+            flat
+            dense
+            icon="logout"
+            class="q-px-md"
+            @click="resetWorkspace"
           />
         </div>
       </q-toolbar>
@@ -170,6 +178,53 @@ export default {
         })
         .catch(() => {
           // fail
+        });
+    },
+    resetWorkspace() {
+      const currentUrl = window.location.href;
+      this.$swal
+        .fire({
+          title: 'Clear workspace? ',
+          html:
+            `<div style="text-align:left;">
+               <div style="font-size:14px; color:#555; margin-bottom:8px;">This will remove your workspace id from session. You will get a fresh workspace afterwards.</div>
+               <div style="display:flex; align-items:center; gap:8px; padding:10px; border-radius:8px; background:#f8f9fb;">
+                 <span style="flex:1; overflow:auto; white-space:nowrap; font-family:monospace; font-size:12px;" id="current-url">${currentUrl}</span>
+                 <button id="copy-url-btn" style="cursor:pointer; border:none; background:#e9ecef; padding:6px 10px; border-radius:6px; font-size:12px;">📋 Copy URL</button>
+               </div>
+             </div>`,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Yes, clear it',
+          cancelButtonText: 'Cancel',
+          focusCancel: true,
+          didOpen: () => {
+            const btn = document.getElementById('copy-url-btn');
+            if (btn) {
+              btn.addEventListener('click', () => {
+                try {
+                  const toCopy = currentUrl;
+                  if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(toCopy)
+                      .then(() => this.$swal.fire({ position: 'bottom-end', icon: 'success', title: 'URL copied', showConfirmButton: false, timer: 1200 }));
+                  } else {
+                    // Fallback using Quasar util
+                    copyToClipboard(toCopy)
+                      .then(() => this.$swal.fire({ position: 'bottom-end', icon: 'success', title: 'URL copied', showConfirmButton: false, timer: 1200 }))
+                      .catch(() => {});
+                  }
+                } catch (e) { /* ignore */ }
+              });
+            }
+          },
+        })
+        .then((result) => {
+          if (result.isConfirmed) {
+            axios
+              .get('app/clear-workspace')
+              .then(() => { window.location.href = '/app'; })
+              .catch(() => { window.location.href = '/app'; });
+          }
         });
     },
   },
