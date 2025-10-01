@@ -83,9 +83,17 @@ export default {
 
 <style scoped>
 .home {
-  .page-header {
-    height: 55px;
-  }
   padding-top: 5vh;
+  padding-bottom: 4vh;
+}
+
+.home .page-header {
+  height: auto;
+  background: transparent !important;
+}
+
+.home .row {
+  align-items: stretch;
+  justify-content: center;
 }
 </style>

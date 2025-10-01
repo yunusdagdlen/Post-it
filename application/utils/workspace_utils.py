@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime
 
 import bleach
-from flask import request, current_app
+from flask import request, current_app, session
 
 from application import db
 from application.models import Postit
@@ -124,3 +124,12 @@ class WorkspaceUtils:
         db.session.add(new_workspace)
         db.session.commit()
         return unique_id
+
+    @staticmethod
+    def get_workspace_id():
+        """Return workspace_id from session; create and persist if missing."""
+        wid = session.get('workspace_id')
+        if not wid:
+            wid = WorkspaceUtils.create_workspace()
+            session['workspace_id'] = wid
+        return wid

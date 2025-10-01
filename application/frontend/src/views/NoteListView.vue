@@ -204,9 +204,33 @@ export default {
 
 <style scoped>
 .home {
-  .page-header {
-    height: 55px;
-  }
   padding-top: 5vh;
+  padding-bottom: 4vh;
+}
+
+.home .page-header {
+  height: auto;
+}
+
+.home .q-markup-table {
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 10px 24px rgba(31, 45, 61, 0.08);
+  background: #ffffff;
+}
+
+.home thead th {
+  background: #f8f9fb;
+  color: #495057;
+  font-weight: 600;
+}
+
+.home tbody tr:nth-child(even) {
+  background: #fcfdff;
+}
+
+.home td,
+.home th {
+  border-color: rgba(0, 0, 0, 0.06);
 }
 </style>

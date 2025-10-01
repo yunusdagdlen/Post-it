@@ -1,6 +1,6 @@
 <template class="">
   <div class="PageHeader">
-    <q-header class="HeaderToolbar q-mx-xl bordered bg-white">
+    <div class="HeaderToolbar q-mx-xl bordered bg-white">
       <q-toolbar class="q-px-xl rounded bordered">
         <q-toolbar-title class="text-weight-medium">
           <router-link
@@ -49,7 +49,7 @@
           />
         </div>
       </q-toolbar>
-    </q-header>
+    </div>
   </div>
 
   <q-dialog v-model="newNote">
@@ -180,14 +180,25 @@ export default {
 .PageHeader {
   background: transparent;
   width: 100%;
-  height: 20px;
-  .HeaderToolbar {
-    background: none;
-    border-radius: 15px;
-    border: 2px solid #adb5bd;
-    color: #adb5bd;
-    font-weight: 700;
-    margin-top: 5vh;
-  }
+}
+
+.HeaderToolbar {
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 16px;
+  border: 1px solid rgba(173, 181, 189, 0.4);
+  color: #495057;
+  font-weight: 600;
+  margin-top: 5vh;
+  box-shadow: 0 6px 20px rgba(31, 45, 61, 0.08);
+  backdrop-filter: saturate(150%) blur(8px);
+}
+
+.HeaderToolbar .q-toolbar {
+  min-height: 56px;
+}
+
+.HeaderToolbar .q-btn {
+  margin-left: 6px;
+  margin-right: 6px;
 }
 </style>

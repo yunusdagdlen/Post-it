@@ -231,5 +231,31 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 8px;
+}
+
+.PostitMain .q-card {
+  border-radius: 16px;
+  box-shadow: 0 10px 24px rgba(31, 45, 61, 0.12);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.PostitMain .q-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 32px rgba(31, 45, 61, 0.18);
+}
+
+.PostitMain .text-h6 {
+  color: #1f2d3d;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.PostitMain hr {
+  border: none;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.08);
+  margin: 6px 0;
 }
 </style>
