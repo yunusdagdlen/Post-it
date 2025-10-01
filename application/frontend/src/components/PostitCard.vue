@@ -3,7 +3,7 @@
     <q-card
       style="
         color: black;
-        min-width: 20vh;
+        width: 100%;
         max-width: 500px;
         min-height: 30px;
         border-radius: 15px;
@@ -70,15 +70,15 @@
           </div>
         </div>
       </q-card-section>
-      <template v-if="this.showNote">
-        <q-card-section class="q-pt-none text-black">
+      <transition name="card-expand">
+        <q-card-section v-show="this.showNote" class="q-pt-none text-black card-content">
           <template v-for="note in this.notes_by_line" :key="note">
-            <span style="white-space: pre-line">{{ note }}</span>
+            <span class="note-line">{{ note }}</span>
             <hr />
           </template>
           <div v-if="formattedCreatedAt" class="created-at text-black">{{ formattedCreatedAt }}</div>
         </q-card-section>
-      </template>
+      </transition>
     </q-card>
   </div>
 
@@ -276,4 +276,28 @@ export default {
   margin-top: 8px;
   text-align: right;
 }
+
+/* Ensure flex children can shrink and cards don't overflow */
+.PostitMain { min-width: 0; }
+.PostitMain .q-card { max-width: 100%; min-width: 0; box-sizing: border-box; }
+
+/* Robust text wrapping for titles and note content */
+.PostitMain .text-h6 { overflow-wrap: anywhere; word-break: break-word; }
+.card-content { white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; }
+.card-content .note-line { white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; display: block; }
+.card-content img, .card-content video, .card-content iframe { max-width: 100%; height: auto; }
 </style>
+
+
+/* Simple expand/collapse animation for card content */
+.card-expand-enter-active, .card-expand-leave-active {
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+.card-expand-enter-from, .card-expand-leave-to {
+  opacity: 0;
+  transform: translateY(-6px) scale(0.98);
+}
+.card-expand-enter-to, .card-expand-leave-from {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}

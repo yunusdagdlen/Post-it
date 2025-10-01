@@ -100,6 +100,9 @@
           <q-btn flat round dense icon="close" v-close-popup />
         </div>
       </q-card-section>
+      <q-card-section class="q-pt-none q-px-md text-grey-7" style="font-size: 12px;">
+        Add a title and a quick note. Pick a color if you like — you can edit anytime.
+      </q-card-section>
       <q-card-section class="q-pt-sm">
         <q-input ref="titleInput" v-model="title" label="Title" filled standout="bg-grey-2 text-dark" dense autofocus />
       </q-card-section>
@@ -200,9 +203,7 @@ export default {
       return this.viewToggleTooltip;
     },
     headerTitle() {
-      const p = this.$route && this.$route.path ? this.$route.path : '';
-      // Show 'Home' when on main board (/app); otherwise keep brand name
-      return (p.includes('note-list')) ? 'NotedFlow' : 'Home';
+      return 'NotedFlow';
     }
   },
   methods: {

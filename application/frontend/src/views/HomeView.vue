@@ -17,8 +17,8 @@
       <div class="empty-card" @click="openNewNoteDialog">
         <div class="icon">✏️</div>
         <div class="title">Start by adding a note</div>
-        <div class="subtitle">Click here to create your first note</div>
-        <q-btn color="primary" label="Add a note" class="q-mt-md" @click.stop="openNewNoteDialog" />
+        <div class="subtitle">Create your first note to get started. NotedFlow is a shareable notebook with simple status control — perfect for capturing ideas and tracking progress.</div>
+        <q-btn color="primary" label="Start now" class="q-mt-md" @click.stop="openNewNoteDialog" />
       </div>
     </div>
 
@@ -110,6 +110,7 @@ export default {
 .home .row {
   align-items: stretch;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
 /* Empty state styling */
