@@ -72,25 +72,35 @@
     </div>
   </div>
 
-  <q-dialog @hide="editNote(noteId)" v-model="editNoteDialog">
-    <q-card
-      style="color: black; width: 90vh; min-height: 220px; border-radius: 15px"
-      :style="{ background: postit?.extra_info?.postit_color }"
-    >
-      <q-card-section>
-        <div class="row full-width">
-          <q-input v-model="title" label="Title" class="full-width" />
+  <q-dialog @hide="editNote(noteId)" v-model="editNoteDialog" transition-show="jump-down" transition-hide="jump-up">
+    <q-card class="modal-card edit-note-card">
+      <div class="modal-accent"></div>
+      <q-card-section class="modal-header">
+        <div class="row items-center no-wrap justify-between">
+          <div class="row items-center no-wrap">
+            <q-avatar size="28px" class="q-mr-sm" color="primary" text-color="white">
+              <q-icon name="edit" size="18px" />
+            </q-avatar>
+            <div class="text-subtitle1 text-weight-medium">Edit note</div>
+          </div>
+          <q-btn flat round dense icon="close" v-close-popup />
         </div>
       </q-card-section>
-      <q-card-section class="q-pt-none text-black">
-        <div class="full-width">
-          <q-input
-            v-model="note"
-            outlined
-            type="textarea"
-            style="min-height: 100px !important"
-          />
-        </div>
+      <q-card-section class="q-pt-sm">
+        <q-input v-model="title" label="Title" filled standout="bg-grey-2 text-dark" dense />
+      </q-card-section>
+      <q-card-section class="q-pt-none">
+        <q-input
+          v-model="note"
+          label="Update your note..."
+          filled
+          standout="bg-grey-2 text-dark"
+          type="textarea"
+          autogrow
+        />
+      </q-card-section>
+      <q-card-section class="q-pt-none q-px-md q-pb-md text-grey-7" style="font-size: 12px;">
+        Changes are saved when you close the dialog
       </q-card-section>
     </q-card>
   </q-dialog>
@@ -124,7 +134,7 @@ export default {
     },
     fetchAllNotes() {
       const workspace_id = this.$route.query?.workspace_id;
-      const params = { workspace_id: workspace_id };
+      const params = { workspace_id: workspace_id, mode: 'active' };
       axios
         .get(`app/list_postits`, { params }, { withCredentials: true })
         .then((response) => {
@@ -204,9 +214,61 @@ export default {
 
 <style scoped>
 .home {
-  .page-header {
-    height: 55px;
-  }
   padding-top: 5vh;
+  padding-bottom: 4vh;
+}
+
+.home .page-header {
+  height: auto;
+}
+
+.home .q-markup-table {
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 10px 24px rgba(31, 45, 61, 0.08);
+  background: #ffffff;
+}
+
+.home thead th {
+  background: #f8f9fb;
+  color: #495057;
+  font-weight: 600;
+}
+
+.home tbody tr:nth-child(even) {
+  background: #fcfdff;
+}
+
+.home td,
+.home th {
+  border-color: rgba(0, 0, 0, 0.06);
+}
+.modal-card {
+  width: 90vw;
+  max-width: 720px;
+  color: #1f2d3d;
+  border-radius: 18px;
+  box-shadow: 0 20px 50px rgba(31, 45, 61, 0.18);
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.modal-accent {
+  height: 4px;
+  width: 100%;
+  background: #4dabf7;
+}
+
+.modal-header {
+  padding-top: 14px;
+  padding-bottom: 8px;
+}
+
+.modal-card .q-field--filled .q-field__control {
+  border-radius: 12px;
+}
+
+.modal-card .q-textarea .q-field__native {
+  min-height: 120px;
 }
 </style>

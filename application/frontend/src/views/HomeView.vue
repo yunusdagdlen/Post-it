@@ -5,12 +5,25 @@
       style="border-radius: 15px"
     >
       <page-header
+        ref="pageHeader"
         @success="fetchAllNotes"
-        @viewMode="changeViewMode"
+        @filter="changeViewMode"
         :postitList="this.postitList"
       />
     </div>
+
+    <!-- Empty state: invite user to create the first note -->
+    <div v-if="postitList.length === 0" class="empty-state">
+      <div class="empty-card" @click="openNewNoteDialog">
+        <div class="icon">✏️</div>
+        <div class="title">Start by adding a note</div>
+        <div class="subtitle">Create your first note to get started. NotedFlow is a shareable notebook with simple status control — perfect for capturing ideas and tracking progress.</div>
+        <q-btn color="primary" label="Start now" class="q-mt-md" @click.stop="openNewNoteDialog" />
+      </div>
+    </div>
+
     <div
+      v-else
       class="row q-col-gutter-lg"
       style="display: flex; align-items: baseline; justify-content: center"
     >
@@ -63,13 +76,15 @@ export default {
           console.log(error);
         });
     },
-    changeViewMode() {
-      if (this.viewMode === "active") {
-        this.viewMode = "deactive";
-      } else {
-        this.viewMode = "active";
+    changeViewMode(mode) {
+      if (mode) {
+        this.viewMode = mode;
       }
       this.fetchAllNotes();
+    },
+    openNewNoteDialog() {
+      // Use the PageHeader child component's dialog opening method
+      this.$refs.pageHeader && this.$refs.pageHeader.newNoteDialog();
     },
   },
   computed: {
@@ -83,9 +98,62 @@ export default {
 
 <style scoped>
 .home {
-  .page-header {
-    height: 55px;
-  }
   padding-top: 5vh;
+  padding-bottom: 4vh;
+}
+
+.home .page-header {
+  height: auto;
+  background: transparent !important;
+}
+
+.home .row {
+  align-items: stretch;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Empty state styling */
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+}
+
+.empty-card {
+  user-select: none;
+  cursor: pointer;
+  text-align: center;
+  padding: 32px 28px;
+  border-radius: 16px;
+  border: 2px dashed #ced4da;
+  background: #fff;
+  color: #495057;
+  max-width: 520px;
+  width: 100%;
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.empty-card:hover {
+  background: #f8f9fa;
+  border-color: #adb5bd;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+}
+
+.empty-card .icon {
+  font-size: 42px;
+  margin-bottom: 8px;
+}
+
+.empty-card .title {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.empty-card .subtitle {
+  font-size: 14px;
+  color: #868e96;
+  margin-top: 4px;
 }
 </style>

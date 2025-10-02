@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime
 
 import bleach
-from flask import request, current_app
+from flask import request, current_app, session
 
 from application import db
 from application.models import Postit
@@ -22,7 +22,7 @@ class WorkspaceUtils:
         workspace_record = WorkSpaces.query.filter_by(uuid=workspace_id).first()
         if workspace_record:
             if unique_id:
-                extra_info = {'postit_color': color}
+                extra_info = {'postit_color': color, 'created_at': datetime.utcnow().isoformat()}
                 new_note = Postit(title=title,
                                   note=note,
                                   uuid=unique_id,
@@ -87,10 +87,14 @@ class WorkspaceUtils:
         workspace_rec = WorkSpaces.query.filter_by(uuid=workspace_uuid).first()
         if workspace_rec:
             postit_query = Postit.query.filter(Postit.workspace_id==workspace_rec.id, Postit.is_deleted.isnot(True))
+            # Support new and legacy mode names
             if mode == 'active':
                 postit_query = postit_query.filter(Postit.active == True)
-            elif mode == 'deactive':
+            elif mode in ('disabled', 'deactive'):
                 postit_query = postit_query.filter(Postit.active == False)
+            elif mode == 'all' or mode == '' or mode == 'default':
+                pass  # no additional filter
+            # any other mode: default to all
 
             postits_records = postit_query.all()
             for rec in postits_records:
@@ -124,3 +128,12 @@ class WorkspaceUtils:
         db.session.add(new_workspace)
         db.session.commit()
         return unique_id
+
+    @staticmethod
+    def get_workspace_id():
+        """Return workspace_id from session; create and persist if missing."""
+        wid = session.get('workspace_id')
+        if not wid:
+            wid = WorkspaceUtils.create_workspace()
+            session['workspace_id'] = wid
+        return wid
