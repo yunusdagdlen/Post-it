@@ -86,12 +86,15 @@ def add_note_app():
 def edit_note_app():
     title = request.args.get('title', '')
     note = request.args.get('note', '')
+    color = request.args.get('color', None)
     note_id = request.args.get('note_id')
-    workspace_id = WorkspaceUtils.get_workspace_id()
-    if title or note:
+    workspace_id = WorkspaceUtils.get_workspace_id(request.args.get('workspace_id'))
+    if title or note or color is not None:
         title = bleach.clean(title)
         note = bleach.clean(note)
-        response = WorkspaceUtils.edit_note(title, note, note_id, workspace_id)
+        if color is not None:
+            color = bleach.clean(color)
+        response = WorkspaceUtils.edit_note(title, note, note_id, workspace_id, color=color)
 
         if response['is_success']:
             return jsonify(response)

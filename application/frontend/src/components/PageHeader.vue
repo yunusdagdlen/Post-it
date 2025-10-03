@@ -10,7 +10,7 @@
             {{ headerTitle }}
           </router-link>
         </q-toolbar-title>
-        <div class="q-mr-md">
+        <div class="q-mr-md actions desktop-actions">
           <q-btn
             rounded
             flat
@@ -43,6 +43,17 @@
             @click="CopyWorkspaceUrl"
           >
             <q-tooltip anchor="bottom middle" self="top middle" class="bg-grey-9 text-white">Copy workspace link</q-tooltip>
+          </q-btn>
+          <q-btn
+            rounded
+            flat
+            dense
+            :icon="orderIcon"
+            class="q-px-md"
+            :aria-label="orderActionLabel"
+            @click="toggleOrder"
+          >
+            <q-tooltip anchor="bottom middle" self="top middle" class="bg-grey-9 text-white">{{ orderTooltip }}</q-tooltip>
           </q-btn>
           <q-btn-dropdown
             rounded
@@ -82,7 +93,53 @@
             <q-tooltip anchor="bottom middle" self="top middle" class="bg-grey-9 text-white">Reset workspace</q-tooltip>
           </q-btn>
         </div>
+        <div class="q-mr-sm actions mobile-actions">
+          <q-btn rounded flat dense icon="menu" aria-label="Open actions" @click="mobileActionsOpen = !mobileActionsOpen" />
+        </div>
       </q-toolbar>
+      <q-slide-transition>
+        <div v-if="mobileActionsOpen" class="mobile-actions-panel">
+          <q-list>
+            <q-item clickable @click="mobileActionsOpen=false; newNoteDialog()">
+              <q-item-section avatar><q-icon name="mdi-pencil-plus-outline" /></q-item-section>
+              <q-item-section>Add note</q-item-section>
+            </q-item>
+            <q-item clickable @click="mobileActionsOpen=false; toggleView()">
+              <q-item-section avatar><q-icon :name="viewToggleIcon" /></q-item-section>
+              <q-item-section>{{ viewToggleTooltip }}</q-item-section>
+            </q-item>
+            <q-item clickable @click="mobileActionsOpen=false; toggleOrder()">
+              <q-item-section avatar><q-icon :name="orderIcon" /></q-item-section>
+              <q-item-section>{{ orderActionLabel }}</q-item-section>
+            </q-item>
+            <q-item clickable @click="mobileActionsOpen=false; CopyWorkspaceUrl()">
+              <q-item-section avatar><q-icon name="link" /></q-item-section>
+              <q-item-section>Copy workspace link</q-item-section>
+            </q-item>
+            <q-expansion-item expand-separator icon="filter_alt" label="Filter" header-class="text-body1">
+              <q-list>
+                <q-item clickable @click="mobileActionsOpen=false; setViewMode('active')">
+                  <q-item-section avatar><q-icon name="check_circle" :color="currentMode==='active' ? 'primary' : 'grey-5'" /></q-item-section>
+                  <q-item-section>Active</q-item-section>
+                </q-item>
+                <q-item clickable @click="mobileActionsOpen=false; setViewMode('deactive')">
+                  <q-item-section avatar><q-icon name="block" :color="currentMode==='deactive' ? 'primary' : 'grey-5'" /></q-item-section>
+                  <q-item-section>Deactive</q-item-section>
+                </q-item>
+                <q-item clickable @click="mobileActionsOpen=false; setViewMode('all')">
+                  <q-item-section avatar><q-icon name="layers" :color="currentMode==='all' ? 'primary' : 'grey-5'" /></q-item-section>
+                  <q-item-section>All</q-item-section>
+                </q-item>
+              </q-list>
+            </q-expansion-item>
+            <q-separator />
+            <q-item clickable @click="mobileActionsOpen=false; resetWorkspace()">
+              <q-item-section avatar><q-icon name="restart_alt" /></q-item-section>
+              <q-item-section>Reset workspace</q-item-section>
+            </q-item>
+          </q-list>
+        </div>
+      </q-slide-transition>
     </div>
   </div>
 
@@ -166,6 +223,8 @@ export default {
       color: "",
       presetColors: ["#29bf12", "#abff4f", "#08bdbd", "#ff9914", "#4dabf7", "#845ef7", "#e64980", "#ffa94d"],
       currentMode: 'active',
+      mobileActionsOpen: false,
+      isDesc: true, // default order: newest first
     };
   },
   watch: {
@@ -177,7 +236,7 @@ export default {
       immediate: true,
     },
   },
-  emits: ["success", "filter", "viewMode"],
+  emits: ["success", "filter", "viewMode", "order"],
   props: {
     postitList: {
       type: Array,
@@ -204,6 +263,19 @@ export default {
     },
     headerTitle() {
       return 'NotedFlow';
+    },
+    orderTooltip() {
+      return this.isDesc
+        ? 'Current: newest first. Click to show oldest first'
+        : 'Current: oldest first. Click to show newest first';
+    },
+    orderIcon() {
+      // Visual hint: downward arrow when showing newest first (desc), upward when oldest first (asc)
+      return this.isDesc ? 'arrow_downward' : 'arrow_upward';
+    },
+    orderActionLabel() {
+      // Label for mobile actions: shows what will happen on click
+      return this.isDesc ? 'Show oldest first' : 'Show newest first';
     }
   },
   methods: {
@@ -217,6 +289,10 @@ export default {
       // Emit new event name and legacy one for compatibility
       this.$emit('filter', mode);
       this.$emit('viewMode', mode);
+    },
+    toggleOrder() {
+      this.isDesc = !this.isDesc;
+      this.$emit('order', this.isDesc ? 'desc' : 'asc');
     },
     toggleView() {
       const wid = this.$route.query?.workspace_id || this.workspace_id;
@@ -418,9 +494,40 @@ export default {
   min-height: 56px;
 }
 
+/* Reduce toolbar horizontal padding on small screens to avoid overflow */
+@media (max-width: 599px) {
+  .HeaderToolbar .q-toolbar {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+}
+
+/* Show/hide action groups based on screen width */
+.actions { display: flex; align-items: center; }
+.mobile-actions { display: none; }
+.desktop-actions { display: flex; }
+@media (max-width: 599px) {
+  .desktop-actions { display: none; }
+  .mobile-actions { display: flex; }
+}
+
 .HeaderToolbar .q-btn {
   margin-left: 2px;
   margin-right: 2px;
+}
+
+/* Mobile slide-down actions panel */
+.mobile-actions-panel {
+  display: none;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(173, 181, 189, 0.4);
+  border-top: none;
+  border-radius: 0 0 16px 16px;
+  box-shadow: 0 10px 24px rgba(31, 45, 61, 0.12);
+  padding: 4px 6px;
+}
+@media (max-width: 599px) {
+  .mobile-actions-panel { display: block; }
 }
 
 /* Modern modal styles */

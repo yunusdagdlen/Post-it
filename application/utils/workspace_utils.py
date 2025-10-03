@@ -7,6 +7,7 @@ from datetime import datetime
 
 import bleach
 from flask import request, current_app, session
+from sqlalchemy.orm.attributes import flag_modified
 
 from application import db
 from application.models import Postit
@@ -38,17 +39,32 @@ class WorkspaceUtils:
         return is_success
 
     @staticmethod
-    def edit_note(title, note, note_id, workspace_id):
+    def edit_note(title, note, note_id, workspace_id, color=None):
         response = {}
         workspace_rec = WorkSpaces.query.filter_by(uuid=workspace_id, active=True).first()
-        workspace_edit = Postit.query.filter_by(uuid=note_id, workspace_id=workspace_rec.id).first()
-        workspace_edit.title = title
-        workspace_edit.note = note
-        workspace_edit.active = True
+        postit_rec = Postit.query.filter_by(uuid=note_id, workspace_id=workspace_rec.id).first()
+        if not postit_rec:
+            response['is_success'] = False
+            return response
+        postit_rec.title = title
+        postit_rec.note = note
+        postit_rec.active = True
+        # Update color if provided
+        if color is not None and color != '':
+            try:
+                extra = postit_rec.extra_info or {}
+                # ensure dict and preserve existing keys
+                if not isinstance(extra, dict):
+                    extra = {}
+                extra['postit_color'] = color
+                postit_rec.extra_info = extra
+                flag_modified(postit_rec, 'extra_info')
+            except Exception:
+                pass
         try:
             db.session.commit()
             response['is_success'] = True
-        except:
+        except Exception:
             response['is_success'] = False
 
         return response
@@ -108,7 +124,7 @@ class WorkspaceUtils:
                     'uuid': rec.uuid,
                     'extra_info': rec.extra_info,
                 })
-        return_list = sorted(return_list, key=lambda x: x['id'])
+        return_list = sorted(return_list, key=lambda x: x['id'], reverse=True)
         return return_list
 
     @staticmethod
@@ -130,9 +146,9 @@ class WorkspaceUtils:
         return unique_id
 
     @staticmethod
-    def get_workspace_id():
+    def get_workspace_id(workspace_id=None):
         """Return workspace_id from session; create and persist if missing."""
-        wid = session.get('workspace_id')
+        wid = workspace_id or session.get('workspace_id')
         if not wid:
             wid = WorkspaceUtils.create_workspace()
             session['workspace_id'] = wid

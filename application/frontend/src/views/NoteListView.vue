@@ -5,65 +5,60 @@
     </div>
 
     <div>
-      <q-markup-table class="q-mb-xl">
+      <q-markup-table class="q-mb-xl notes-table">
         <thead>
           <tr>
             <th class="text-left">Title</th>
-            <th class="text-left">Notes</th>
             <th class="text-center">Actions</th>
           </tr>
         </thead>
         <tbody>
           <template v-for="postit in this.postitList" :key="postit">
             <tr>
-              <td class="text-left" style="width: 15%">{{ postit.title }}</td>
-              <td class="text-left">
-                <q-list separator>
-                  <template v-for="line in postit.note.split('\n')" :key="line">
-                    <q-item clickable v-ripple>
-                      <q-item-section>{{ line }}</q-item-section>
-                    </q-item>
-                  </template>
-                </q-list>
+              <td class="text-left title-col">
+                <div class="title-text text-weight-bold">{{ postit.title }}</div>
+                <!-- Mobile-only combined note content -->
+                <div class="mobile-note">
+                  <q-list separator>
+                    <template v-for="line in postit.note.split('\n')" :key="line">
+                      <q-item>
+                        <q-item-section>{{ line }}</q-item-section>
+                      </q-item>
+                    </template>
+                  </q-list>
+                </div>
               </td>
-              <td class="text-center" style="width: 200px">
-                <q-btn
-                  flat
-                  outline
-                  round
-                  color="black"
-                  icon="mdi-content-copy"
-                  size="sm"
-                />
-                <q-btn
-                  size="sm"
-                  flat
-                  outline
-                  round
-                  color="grey-7"
-                  icon="edit"
-                  @click="
-                    openEditDialog(postit.uuid, postit.title, postit.note)
-                  "
-                />
-                <q-btn
-                  flat
-                  outline
-                  round
-                  color="grey-7"
-                  icon="delete"
-                  size="sm"
-                  @click="deleteNote(postit.uuid)"
-                />
-                <q-btn
-                  flat
-                  outline
-                  round
-                  color="grey-7"
-                  icon="block"
-                  size="sm"
-                  @click="disableNote(postit.uuid)"
-                />
+              <td class="text-center actions-col" :rowspan="2">
+                <div class="actions-desktop">
+                  <q-btn flat outline round color="grey-7" icon="mdi-content-copy" size="sm" @click="copyNote(postit)" />
+                  <q-btn flat outline round color="grey-7" icon="edit" size="sm" @click="openEditDialog(postit.uuid, postit.title, postit.note)" />
+                  <q-btn flat outline round color="grey-7" icon="delete" size="sm" @click="deleteNote(postit.uuid)" />
+                  <q-btn flat outline round color="grey-7" icon="block" size="sm" @click="disableNote(postit.uuid)" />
+                </div>
+                <div class="actions-mobile">
+                  <q-btn flat outline round color="grey-7" icon="menu" size="sm">
+                    <q-menu fit anchor="bottom right" self="top right">
+                      <q-list style="min-width: 160px">
+                        <q-item clickable v-close-popup @click="copyNote(postit)">
+                          <q-item-section avatar><q-icon name="mdi-content-copy" /></q-item-section>
+                          <q-item-section>Copy</q-item-section>
+                        </q-item>
+                        <q-item clickable v-close-popup @click="openEditDialog(postit.uuid, postit.title, postit.note)">
+                          <q-item-section avatar><q-icon name="edit" /></q-item-section>
+                          <q-item-section>Edit</q-item-section>
+                        </q-item>
+                        <q-item clickable v-close-popup @click="deleteNote(postit.uuid)">
+                          <q-item-section avatar><q-icon name="delete" /></q-item-section>
+                          <q-item-section>Delete</q-item-section>
+                        </q-item>
+                        <q-item clickable v-close-popup @click="disableNote(postit.uuid)">
+                          <q-item-section avatar><q-icon name="block" /></q-item-section>
+                          <q-item-section>Disable</q-item-section>
+                        </q-item>
+                      </q-list>
+                    </q-menu>
+                  </q-btn>
+                </div>
               </td>
             </tr>
           </template>
@@ -109,6 +104,7 @@
 <script>
 import PageHeader from "@/components/PageHeader.vue";
 import axios from "axios";
+import { copyToClipboard } from "quasar";
 
 //axios.defaults.baseURL = "https://notedflow.com";
 //axios.defaults.baseURL = "http://127.0.0.1:5000";
@@ -131,6 +127,17 @@ export default {
       this.title = title;
       this.note = note;
       this.editNoteDialog = true;
+    },
+    copyNote(postit) {
+      try {
+        const text = `${postit.title ? postit.title + "\n\n" : ''}${postit.note || ''}`.trim();
+        if (!text) return;
+        copyToClipboard(text).then(() => {
+          if (this.$swal && typeof this.$swal.fire === 'function') {
+            this.$swal.fire({ position: 'bottom-end', icon: 'success', title: 'Copied', showConfirmButton: false, timer: 1200 });
+          }
+        }).catch(() => {});
+      } catch (e) { /* noop */ }
     },
     fetchAllNotes() {
       const workspace_id = this.$route.query?.workspace_id;
@@ -243,6 +250,32 @@ export default {
 .home th {
   border-color: rgba(0, 0, 0, 0.06);
 }
+
+/* Make list view table mobile-friendly */
+.notes-table { table-layout: fixed; width: 100%; }
+.notes-table th, .notes-table td { white-space: normal; overflow-wrap: anywhere; word-break: break-word; }
+.notes-table td .q-item, .notes-table td .q-item__section { white-space: normal; overflow-wrap: anywhere; word-break: break-word; }
+
+/* Columns */
+.title-col { width: auto; }
+.actions-col { width: auto; }
+.actions-col { display: flex; gap: 6px; justify-content: flex-end; align-items: center; }
+
+/* Visibility and layout */
+.mobile-note { display: block; margin-top: 6px; }
+.actions-desktop { display: inline-flex; }
+.actions-mobile { display: none; }
+@media (max-width: 599px) {
+  .actions-desktop { display: none; }
+  .actions-mobile { display: inline-flex; }
+}
+/* notes-col removed */
+
+/* Ensure wrapping inside combined cell */
+.title-text, .mobile-note, .mobile-note .q-item, .mobile-note .q-item__section {
+  white-space: normal; overflow-wrap: anywhere; word-break: break-word;
+}
+
 .modal-card {
   width: 90vw;
   max-width: 720px;

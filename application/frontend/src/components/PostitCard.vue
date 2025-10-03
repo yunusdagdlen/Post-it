@@ -82,29 +82,56 @@
     </q-card>
   </div>
 
-  <q-dialog v-model="editNoteDialog">
-    <q-card
-      style="color: black; width: 90vh; min-height: 220px; border-radius: 15px"
-      :style="{ background: postit?.extra_info?.postit_color }"
-    >
-      <q-card-section>
-        <div class="row full-width">
-          <q-input v-model="title" label="Title" class="full-width" />
+  <q-dialog v-model="editNoteDialog" transition-show="jump-down" transition-hide="jump-up">
+    <q-card ref="editNoteCard" class="modal-card edit-note-card">
+      <div class="modal-accent" :style="{ background: color || postit?.extra_info?.postit_color || '#4dabf7' }"></div>
+      <q-card-section class="modal-header">
+        <div class="row items-center no-wrap justify-between">
+          <div class="row items-center no-wrap">
+            <q-avatar size="28px" class="q-mr-sm" :style="{ background: color || postit?.extra_info?.postit_color || '#4dabf7' }">
+              <q-icon name="edit" color="white" size="18px" />
+            </q-avatar>
+            <div class="text-subtitle1 text-weight-medium">Edit note</div>
+          </div>
+          <q-btn flat round dense icon="close" v-close-popup />
         </div>
       </q-card-section>
-      <q-card-section class="q-pt-none text-black">
-        <div class="full-width">
-          <q-input
-            v-model="note"
-            outlined
-            type="textarea"
-            style="min-height: 100px !important"
-          />
+      <q-card-section class="q-pt-sm">
+        <q-input v-model="title" label="Title" filled standout="bg-grey-2 text-dark" dense />
+      </q-card-section>
+      <q-card-section class="q-pt-none">
+        <q-input
+          v-model="note"
+          label="Write your note..."
+          filled
+          standout="bg-grey-2 text-dark"
+          type="textarea"
+          autogrow
+        />
+      </q-card-section>
+      <!-- Color picker: preset swatches -->
+      <q-card-section class="q-pt-none q-px-md">
+        <div class="text-caption text-grey-7 q-mb-sm">Color</div>
+        <div class="row items-center q-gutter-sm">
+          <div
+            v-for="c in presetColors"
+            :key="c"
+            class="color-swatch"
+            :style="{ background: c, outlineColor: c }"
+            :aria-label="'Select color ' + c"
+            :class="{ selected: color === c }"
+            role="button"
+            tabindex="0"
+            @click="color = c"
+            @keydown.enter.prevent="color = c"
+          >
+            <q-icon v-if="color === c" name="check" color="white" size="16px" />
+          </div>
         </div>
       </q-card-section>
-      <q-card-actions class="q-pr-md q-pt-none">
-        <q-space />
-        <q-btn @click="editSingleNote" label="Save" color="black" outline />
+      <q-card-actions align="right" class="q-pa-md">
+        <q-btn flat color="grey-7" label="Cancel" v-close-popup />
+        <q-btn unelevated color="primary" label="Save" icon="save" @click="editSingleNote" />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -120,6 +147,8 @@ export default {
       editNoteDialog: false,
       title: this.postit.title,
       note: this.postit.note,
+      color: (this.postit && this.postit.extra_info && this.postit.extra_info.postit_color) ? this.postit.extra_info.postit_color : '#4dabf7',
+      presetColors: ["#29bf12", "#abff4f", "#08bdbd", "#ff9914", "#4dabf7", "#845ef7", "#e64980", "#ffa94d"],
       active: this.postit.active,
       notes_by_line: this.postit.notes_by_line,
       showNote: false,
@@ -134,6 +163,16 @@ export default {
     },
   },
   emits: ["ok"],
+  watch: {
+    editNoteDialog(val) {
+      if (val) {
+        // Sync fields from current postit when opening dialog
+        this.title = this.postit.title;
+        this.note = this.postit.note;
+        this.color = (this.postit && this.postit.extra_info && this.postit.extra_info.postit_color) ? this.postit.extra_info.postit_color : this.color;
+      }
+    }
+  },
   computed: {
     formattedCreatedAt() {
       try {
@@ -172,30 +211,23 @@ export default {
     // },
     editSingleNote() {
       const workspace_id = this.$route.query?.workspace_id;
-      // const params = {
-      //   workspace_id: workspace_id,
-      //   note_id: this.postit.uuid,
-      //   title: this.title,
-      //   note: this.note,
-      // };
-      const params = new URLSearchParams({
+      const params = {
         workspace_id: workspace_id,
         note_id: this.postit.uuid,
         title: this.title,
-        note: this.note
-      });
-      window.location.href = `edit-note?${params.toString()}`;
-      // axios
-      //     .get(`app/edit-note`, { params }, { withCredentials: true })
-      //     .then((response) => {
-      //       if (response.status === 200) {
-      //         this.editNoteDialog = false;
-      //         this.$emit("ok");
-      //       }
-      //     })
-      //     .catch((error) => {
-      //       console.log(error);
-      //     });
+        note: this.note,
+        color: this.color,
+      };
+      axios.get(`app/edit-note`, { params }, { withCredentials: true })
+          .then((response) => {
+            if (response.status === 200) {
+              this.editNoteDialog = false;
+              this.$emit("ok");
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+          });
     },
 
     deleteNote() {
@@ -288,7 +320,7 @@ export default {
 .card-content img, .card-content video, .card-content iframe { max-width: 100%; height: auto; }
 </style>
 
-
+<style scoped>
 /* Simple expand/collapse animation for card content */
 .card-expand-enter-active, .card-expand-leave-active {
   transition: opacity 160ms ease, transform 160ms ease;
@@ -301,3 +333,47 @@ export default {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
+</style>
+
+
+<style scoped>
+/* Modern modal styles for edit dialog (match create new note modal) */
+.modal-card {
+  width: 90vw;
+  max-width: 720px;
+  color: #1f2d3d;
+  border-radius: 18px;
+  box-shadow: 0 20px 50px rgba(31, 45, 61, 0.18);
+  overflow: hidden;
+  background: #ffffff;
+}
+.edit-note-card { position: relative; }
+.modal-accent { height: 4px; width: 100%; background: #4dabf7; }
+.modal-header { padding-top: 14px; padding-bottom: 8px; }
+.modal-card .q-field--filled .q-field__control { border-radius: 12px; }
+.modal-card .q-textarea .q-field__native { min-height: 120px; }
+</style>
+
+
+<style scoped>
+/* Color swatch styles for edit modal */
+.color-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  box-shadow: 0 0 0 2px #fff inset, 0 2px 6px rgba(0,0,0,0.15);
+  outline: 2px solid transparent;
+}
+.color-swatch:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 2px #fff inset, 0 4px 10px rgba(0,0,0,0.18);
+}
+.color-swatch.selected {
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.9) inset, 0 0 0 3px rgba(0,0,0,0.08), 0 6px 14px rgba(0,0,0,0.18);
+}
+</style>

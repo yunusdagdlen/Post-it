@@ -1,5 +1,5 @@
-<template class="q-px-xl">
-  <div class="home fullscreen q-mx-xl scroll">
+<template>
+  <div class="home fullscreen scroll">
     <div
       class="page-header q-mb-xl full-width bg-white"
       style="border-radius: 15px"
@@ -8,6 +8,7 @@
         ref="pageHeader"
         @success="fetchAllNotes"
         @filter="changeViewMode"
+        @order="changeOrder"
         :postitList="this.postitList"
       />
     </div>
@@ -24,8 +25,7 @@
 
     <div
       v-else
-      class="row q-col-gutter-lg"
-      style="display: flex; align-items: baseline; justify-content: center"
+      class="cards-list"
     >
       <template v-for="postit in this.postitList" :key="postit">
         <postit-card :postit="postit" @ok="fetchAllNotes" />
@@ -54,6 +54,7 @@ export default {
     return {
       postitList: [],
       viewMode: "active",
+      orderDesc: true,
     };
   },
   methods: {
@@ -64,7 +65,8 @@ export default {
         .get(`app/list_postits`, { params }, { withCredentials: true })
         .then((response) => {
           if (response.status === 200) {
-            this.postitList = response.data.postits;
+            const list = response.data.postits || [];
+            this.postitList = list.slice().sort((a, b) => this.orderDesc ? (b.id - a.id) : (a.id - b.id));
             if (response.data?.workspace_id) {
               this.$router.push({
                 query: { workspace_id: response.data.workspace_id },
@@ -81,6 +83,11 @@ export default {
         this.viewMode = mode;
       }
       this.fetchAllNotes();
+    },
+    changeOrder(dir) {
+      this.orderDesc = dir ? (dir === 'desc') : !this.orderDesc;
+      // Re-sort current list without refetch
+      this.postitList = (this.postitList || []).slice().sort((a, b) => this.orderDesc ? (b.id - a.id) : (a.id - b.id));
     },
     openNewNoteDialog() {
       // Use the PageHeader child component's dialog opening method
@@ -100,6 +107,25 @@ export default {
 .home {
   padding-top: 5vh;
   padding-bottom: 4vh;
+  padding-left: 12px;
+  padding-right: 12px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  overflow-x: hidden;
+}
+
+@media (min-width: 600px) {
+  .home {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+@media (min-width: 1024px) {
+  .home {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
 }
 
 .home .page-header {
@@ -111,6 +137,17 @@ export default {
   align-items: stretch;
   justify-content: center;
   flex-wrap: wrap;
+}
+
+/* Cards list container to avoid negative gutters from Quasar row */
+.cards-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* Empty state styling */
