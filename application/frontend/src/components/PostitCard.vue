@@ -18,7 +18,7 @@
       <!--default view -->
       <q-card-section>
         <div class="row">
-          <div class="text-h6 text-black col-9" style="word-break: auto-phrase">
+          <div class="text-h6 text-black col-9">
             {{ this.title }}
           </div>
           <q-space />
@@ -314,7 +314,9 @@ export default {
 .PostitMain .q-card { max-width: 100%; min-width: 0; box-sizing: border-box; }
 
 /* Robust text wrapping for titles and note content */
-.PostitMain .text-h6 { overflow-wrap: anywhere; word-break: break-word; }
+/* Title should break by words, not inside words */
+.PostitMain .text-h6 { white-space: normal; overflow-wrap: normal; word-break: keep-all; hyphens: manual; }
+/* Keep note content resilient (allow breaking inside very long tokens) */
 .card-content { white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; }
 .card-content .note-line { white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-word; display: block; }
 .card-content img, .card-content video, .card-content iframe { max-width: 100%; height: auto; }
