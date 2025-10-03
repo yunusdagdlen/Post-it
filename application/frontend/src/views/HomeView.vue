@@ -140,7 +140,7 @@ export default {
 }
 
 /* Cards list container to avoid negative gutters from Quasar row */
-.cards-list {
+  .cards-list {
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -156,7 +156,7 @@ export default {
     flex-direction: row;
     flex-wrap: wrap;
     align-items: stretch;
-    justify-content: center;
+    justify-content: flex-start; /* prevent recentering when a card height changes */
     gap: 12px;
   }
   .cards-list > .PostitMain {
