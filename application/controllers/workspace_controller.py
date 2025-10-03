@@ -1,8 +1,19 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (C) 2022 Post-it
+"""Flask controllers for Post-it. Cosmetic refactor only; logic unchanged."""
+
 import bleach
-from flask import render_template, request, redirect, url_for, abort, make_response, jsonify, session
+from flask import (
+    abort,
+    jsonify,
+    make_response,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
 
 from application.controller import mod_pages
 from application.utils.workspace_utils import WorkspaceUtils
@@ -10,10 +21,13 @@ from application.utils.workspace_utils import WorkspaceUtils
 
 @mod_pages.route('/')
 def index_legacy():
+    """Legacy index: redirect to /app."""
     return redirect('/app')
 
-@mod_pages.route('/app') # production build initial point
+
+@mod_pages.route('/app')  # production build initial point
 def index():
+    """Render SPA entry and optionally persist incoming workspace_id to session."""
     workspace_id = request.args.get('workspace_id')
     if workspace_id:
         session['workspace_id'] = workspace_id
@@ -22,16 +36,15 @@ def index():
 
 @mod_pages.route('/edit-note', methods=['POST', 'GET'])
 def edit_note():
+    """Legacy edit endpoint; maintains original semantics including redirects."""
     if request.method == 'GET':
         title = request.args.get('title', '')
         note = request.args.get('note', '')
         uuid = request.args.get('note_id')
         workspace_uuid = WorkspaceUtils.get_workspace_id()
         if title or note:
-            title = bleach.clean(title)
-            note = bleach.clean(note)
-            title = title.replace('&amp;', '&')
-            note = note.replace('&amp;', '&')
+            title = bleach.clean(title).replace('&amp;', '&')
+            note = bleach.clean(note).replace('&amp;', '&')
             respnse = WorkspaceUtils.edit_note(title, note, uuid, workspace_uuid)
             if respnse['is_success']:
                 return redirect(f'/app?workspace_id={workspace_uuid}')
@@ -45,21 +58,25 @@ def edit_note():
 
 @mod_pages.route('/back', methods=['POST', 'GET'])
 def back():
+    """Back helper to index."""
     return redirect(url_for('pages.index'))
 
 
 @mod_pages.route('/app/list_postits', methods=['GET'])
 def list_postits_app():
+    """Return JSON list of notes for current workspace (and the workspace id)."""
     mode = request.args.get('mode', '')
     workspace_uuid = WorkspaceUtils.get_workspace_id()
-    response = {}
-    response['workspace_id'] = workspace_uuid
-    response['postits'] = WorkspaceUtils.get_workspace_notes(workspace_uuid=workspace_uuid, mode=mode)
+    response = {
+        'workspace_id': workspace_uuid,
+        'postits': WorkspaceUtils.get_workspace_notes(workspace_uuid=workspace_uuid, mode=mode),
+    }
     return jsonify(response)
 
 
 @mod_pages.route('/app/add', methods=['GET'])
 def add_note_app():
+    """Add note endpoint (expects title and/or note via query params)."""
     title = request.args.get('title', '')
     note = request.args.get('note', '')
     color = request.args.get('color', '')
@@ -68,10 +85,8 @@ def add_note_app():
 
     # Require at least a title or note content
     if title or note:
-        title = bleach.clean(title)
-        note = bleach.clean(note)
-        title = title.replace('&amp;', '&')
-        note = note.replace('&amp;', '&')
+        title = bleach.clean(title).replace('&amp;', '&')
+        note = bleach.clean(note).replace('&amp;', '&')
         workspace_id = bleach.clean(workspace_id)
         color = bleach.clean(color)
 
@@ -82,8 +97,10 @@ def add_note_app():
     # If no content provided, return 400
     return abort(make_response("Bad Request: title or note required", 400))
 
+
 @mod_pages.route('/app/edit-note/', methods=['GET'])
 def edit_note_app():
+    """AJAX edit note endpoint (JSON)."""
     title = request.args.get('title', '')
     note = request.args.get('note', '')
     color = request.args.get('color', None)
@@ -99,8 +116,10 @@ def edit_note_app():
         if response['is_success']:
             return jsonify(response)
 
+
 @mod_pages.route('/app/delete-note/', methods=['GET'])
 def delete_note_app():
+    """AJAX delete note endpoint (soft delete)."""
     note_id = request.args.get('note_id')
     workspace_id = WorkspaceUtils.get_workspace_id()
     if note_id:
@@ -108,8 +127,10 @@ def delete_note_app():
         if response['is_success']:
             return jsonify(response)
 
+
 @mod_pages.route('/app/disable-note/', methods=['GET'])
 def disable_note_app():
+    """AJAX toggle note active endpoint."""
     note_id = request.args.get('note_id')
     workspace_id = WorkspaceUtils.get_workspace_id()
     if note_id:
@@ -117,8 +138,10 @@ def disable_note_app():
         if response['is_success']:
             return jsonify(response)
 
+
 @mod_pages.route('/app/clear-workspace', methods=['GET', 'POST'])
 def clear_workspace():
+    """Clear workspace id from session."""
     session.pop('workspace_id', None)
     return jsonify({'is_success': True})
 
