@@ -109,7 +109,7 @@ export default {
   padding-bottom: 4vh;
   padding-left: 12px;
   padding-right: 12px;
-  max-width: 1200px;
+  max-width: 1600px;
   margin-left: auto;
   margin-right: auto;
   overflow-x: hidden;
@@ -143,11 +143,31 @@ export default {
 .cards-list {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   justify-content: flex-start;
-  gap: 8px;
+  gap: 12px;
   width: 100%;
   box-sizing: border-box;
+}
+/* Ensure cards can flow side-by-side on wider screens */
+.cards-list > .PostitMain { width: 100%; }
+@media (min-width: 768px) {
+  .cards-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: stretch;
+    justify-content: center;
+    gap: 12px;
+  }
+  .cards-list > .PostitMain {
+    /* allow 2–3 columns depending on viewport */
+    flex: 1 1 340px;
+    max-width: 520px;
+  }
+}
+@media (min-width: 1280px) {
+  .cards-list { justify-content: flex-start; }
+  .cards-list > .PostitMain { flex-basis: 360px; }
 }
 
 /* Empty state styling */
