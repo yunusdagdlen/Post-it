@@ -13,7 +13,7 @@ if [[ $OSTYPE == 'darwin'* ]]; then
   mv -f ./dist/css ./dist/fonts/ ./dist/js ../static/app/
   sed -i '' -e 's/href=\"\//href=\"\/static\/app\//g' ./dist/index.html
   sed -i '' -e 's/src=\"\//src=\"\/static\/app\//g' ./dist/index.html
-  sed -i '' -e 's/FAVICON_PATH/\/static\/img\/favicon\/favicon.ico/g' ./dist/index.html
+  sed -i '' -e 's/FAVICON_PATH/\/static\/img\/favicon\/favicon.svg/g' ./dist/index.html
 
 elif [[ $OSTYPE == 'linux'* ]]; then
   find ./dist -type f -name "*.css" -exec sed -i 's/\/fonts\//\/static\/app\/fonts\//g' {} \;
@@ -26,7 +26,7 @@ elif [[ $OSTYPE == 'linux'* ]]; then
   mv -f ./dist/css ./dist/fonts/ ./dist/js ../static/app/
   sed -i 's/href=\"\//href=\"\/static\/app\//g' ./dist/index.html
   sed -i 's/src=\"\//src=\"\/static\/app\//g' ./dist/index.html
-  sed -i 's/FAVICON_PATH/\/static\/img\/favicon\/favicon.ico/g' ./dist/index.html
+  sed -i 's/FAVICON_PATH/\/static\/img\/favicon\/favicon.svg/g' ./dist/index.html
 else
   echo "Unsupported Operating System"
   exit 2

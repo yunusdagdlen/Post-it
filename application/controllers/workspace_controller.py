@@ -12,7 +12,6 @@ from flask import (
     render_template,
     request,
     session,
-    url_for,
 )
 
 from application.controller import mod_pages
@@ -32,12 +31,6 @@ def index():
     if workspace_id:
         session['workspace_id'] = workspace_id
     return render_template('app/index.html')
-
-
-@mod_pages.route('/back', methods=['POST', 'GET'])
-def back():
-    """Back helper to index."""
-    return redirect(url_for('pages.index'))
 
 
 @mod_pages.route('/app/list_postits', methods=['GET'])
