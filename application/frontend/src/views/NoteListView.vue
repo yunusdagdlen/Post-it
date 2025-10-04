@@ -1,7 +1,7 @@
 <template class="q-px-xl">
   <div class="home q-mx-xl">
     <div class="page-header q-mb-xl full-width bg-white">
-      <page-header @success="fetchAllNotes" :postitList="this.postitList" />
+      <page-header @success="fetchAllNotes" @filter="changeViewMode" @order="changeOrder" :postitList="this.postitList" />
     </div>
 
     <div>
@@ -9,18 +9,21 @@
         <thead>
           <tr>
             <th class="text-left">Title</th>
+            <th class="text-center">Rank</th>
+            <th class="text-left">Status</th>
+            <th class="text-left">Created</th>
             <th class="text-center">Actions</th>
           </tr>
         </thead>
         <tbody>
-          <template v-for="postit in this.postitList" :key="postit">
+          <template v-for="postit in this.postitList" :key="postit.uuid || postit.id">
             <tr>
               <td class="text-left title-col">
                 <div class="title-text text-weight-bold">{{ postit.title }}</div>
                 <!-- Mobile-only combined note content -->
                 <div class="mobile-note">
                   <q-list separator>
-                    <template v-for="line in postit.note.split('\n')" :key="line">
+                    <template v-for="(line, idx) in (postit.note || '').split('\n')" :key="postit.uuid + '-line-' + idx">
                       <q-item>
                         <q-item-section>{{ line }}</q-item-section>
                       </q-item>
@@ -28,7 +31,16 @@
                   </q-list>
                 </div>
               </td>
-              <td class="text-center actions-col" :rowspan="2">
+              <td class="text-center rank-col">
+                <MinimalStars :model-value="(postit.rank === null || postit.rank === undefined || postit.rank === '') ? 1 : postit.rank" :max="5" size="18px" class="minimal-stars" />
+              </td>
+              <td class="text-left status-col">
+                <StatusPicker :model-value="postit.status ?? 0" @update:modelValue="val => updateStatus(postit, val)" />
+              </td>
+              <td class="text-left created-col">
+                {{ formatDate(postit?.extra_info?.created_at) }}
+              </td>
+              <td class="text-center actions-col">
                 <div class="actions-desktop">
                   <q-btn flat outline round color="grey-7" icon="mdi-content-copy" size="sm" @click="copyNote(postit)" />
                   <q-btn flat outline round color="grey-7" icon="edit" size="sm" @click="openEditDialog(postit.uuid, postit.title, postit.note)" />
@@ -103,6 +115,8 @@
 
 <script>
 import PageHeader from "@/components/PageHeader.vue";
+import MinimalStars from "@/components/MinimalStars.vue";
+import StatusPicker from "@/components/StatusPicker.vue";
 import axios from "axios";
 import { copyToClipboard } from "quasar";
 
@@ -111,7 +125,7 @@ import { copyToClipboard } from "quasar";
 
 export default {
   name: "NoteListView",
-  components: { PageHeader },
+  components: { PageHeader, MinimalStars, StatusPicker },
   data() {
     return {
       postitList: [],
@@ -119,6 +133,12 @@ export default {
       title: null,
       note: null,
       noteId: null,
+      // filters and ordering for list view
+      viewMode: 'active',
+      orderDesc: true, // newest first
+      rankFilter: '',
+      statusFilter: '',
+      searchTerm: '',
     };
   },
   methods: {
@@ -139,14 +159,53 @@ export default {
         }).catch(() => {});
       } catch (e) { /* noop */ }
     },
+    changeViewMode(payload) {
+      if (typeof payload === 'object' && payload !== null) {
+        if (payload.mode) this.viewMode = payload.mode;
+        if (payload.rank !== undefined) this.rankFilter = payload.rank;
+        if (payload.status !== undefined) this.statusFilter = payload.status;
+        if (payload.search !== undefined) this.searchTerm = payload.search;
+      } else if (payload) {
+        this.viewMode = payload;
+      }
+      this.fetchAllNotes();
+    },
+    changeOrder(dir) {
+      this.orderDesc = dir ? (dir === 'desc') : !this.orderDesc;
+      this.postitList = (this.postitList || []).slice().sort((a, b) => this.orderDesc ? (b.id - a.id) : (a.id - b.id));
+    },
+    displayRank(r) {
+      return (r === null || r === undefined || r === '') ? 1 : r;
+    },
+    formatDate(iso) {
+      try {
+        if (!iso) return '';
+        const d = new Date(iso);
+        if (isNaN(d.getTime())) return '';
+        return `${d.toLocaleDateString()} ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+      } catch (e) { return ''; }
+    },
+    updateStatus(postit, val) {
+      const workspace_id = this.$route.query?.workspace_id;
+      const params = { workspace_id, note_id: postit.uuid, status: val };
+      // optimistic update
+      postit.status = val;
+      axios.get(`/app/edit-note/`, { params, withCredentials: true })
+        .then(() => {})
+        .catch(() => {});
+    },
     fetchAllNotes() {
       const workspace_id = this.$route.query?.workspace_id;
-      const params = { workspace_id: workspace_id, mode: 'active' };
+      const params = { workspace_id: workspace_id, mode: this.viewMode };
+      if (this.rankFilter !== '' && this.rankFilter !== null && this.rankFilter !== undefined) params.rank = this.rankFilter;
+      if (this.statusFilter !== '' && this.statusFilter !== null && this.statusFilter !== undefined) params.status = this.statusFilter;
+      if ((this.searchTerm || '').trim() !== '') params.search = (this.searchTerm || '').trim();
       axios
         .get(`/app/list_postits`, { params, withCredentials: true })
         .then((response) => {
           if (response.status === 200) {
-            this.postitList = response.data.postits;
+            const list = response.data.postits || [];
+            this.postitList = list.slice().sort((a, b) => this.orderDesc ? (b.id - a.id) : (a.id - b.id));
           }
         })
         .catch((error) => {

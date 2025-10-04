@@ -55,12 +55,18 @@ export default {
       postitList: [],
       viewMode: "active",
       orderDesc: true,
+      rankFilter: '',
+      statusFilter: '',
+      searchTerm: '',
     };
   },
   methods: {
     fetchAllNotes() {
       const workspace_id = this.$route.query?.workspace_id;
       const params = { workspace_id: workspace_id, mode: this.viewMode };
+      if (this.rankFilter !== '' && this.rankFilter !== null && this.rankFilter !== undefined) params.rank = this.rankFilter;
+      if (this.statusFilter !== '' && this.statusFilter !== null && this.statusFilter !== undefined) params.status = this.statusFilter;
+      if ((this.searchTerm || '').trim() !== '') params.search = (this.searchTerm || '').trim();
       axios
         .get(`/app/list_postits`, { params, withCredentials: true })
         .then((response) => {
@@ -78,9 +84,14 @@ export default {
           console.log(error);
         });
     },
-    changeViewMode(mode) {
-      if (mode) {
-        this.viewMode = mode;
+    changeViewMode(payload) {
+      if (typeof payload === 'object' && payload !== null) {
+        if (payload.mode) this.viewMode = payload.mode;
+        if (payload.rank !== undefined) this.rankFilter = payload.rank;
+        if (payload.status !== undefined) this.statusFilter = payload.status;
+        if (payload.search !== undefined) this.searchTerm = payload.search;
+      } else if (payload) {
+        this.viewMode = payload;
       }
       this.fetchAllNotes();
     },

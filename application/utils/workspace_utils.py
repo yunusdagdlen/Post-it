@@ -12,6 +12,7 @@ from typing import Any, Dict, List, Optional
 import bleach
 from flask import current_app, request, session
 from sqlalchemy.orm.attributes import flag_modified
+from sqlalchemy import or_
 
 from application import db
 from application.models import Postit, WorkSpaces
@@ -160,7 +161,7 @@ class WorkspaceUtils:
         return response
 
     @staticmethod
-    def get_workspace_notes(workspace_uuid: str, mode: str = 'default', rank: Optional[str] = None, status: Optional[str] = None) -> List[Dict[str, Any]]:
+    def get_workspace_notes(workspace_uuid: str, mode: str = 'default', rank: Optional[str] = None, status: Optional[str] = None, search: Optional[str] = None) -> List[Dict[str, Any]]:
         """Return notes for a workspace, filtered by mode, and optionally by rank/status; sorted by id desc.
 
         Supported modes: 'active', 'disabled'/'deactive', 'all', '' (default -> all).
@@ -197,6 +198,15 @@ class WorkspaceUtils:
                 if status is not None and str(status) != '':
                     parsed_status = WorkspaceUtils._parse_status(status)
                     postit_query = postit_query.filter(Postit.status == parsed_status)
+            except Exception:
+                pass
+
+            # Apply text search if provided: match title or note
+            try:
+                if search is not None and str(search).strip() != '':
+                    s = bleach.clean(str(search)).strip()
+                    pattern = f"%{s}%"
+                    postit_query = postit_query.filter(or_(Postit.title.ilike(pattern), Postit.note.ilike(pattern)))
             except Exception:
                 pass
 

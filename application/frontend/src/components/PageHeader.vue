@@ -10,6 +10,25 @@
             {{ headerTitle }}
           </router-link>
         </q-toolbar-title>
+        <!-- Centered search -->
+        <div class="header-search gt-sm">
+          <q-input
+            v-model="searchTerm"
+            dense
+            rounded
+            borderless
+            clearable
+            debounce="300"
+            placeholder="Search notes..."
+            @update:model-value="setSearch"
+            input-class="text-body2"
+            aria-label="Search notes"
+          >
+            <template v-slot:prepend>
+              <q-icon name="search" />
+            </template>
+          </q-input>
+        </div>
         <div class="q-mr-md actions desktop-actions">
           <q-btn
             rounded
@@ -300,6 +319,7 @@ export default {
       currentMode: 'active',
       currentRankFilter: '',
       currentStatusFilter: '',
+      searchTerm: '',
       mobileActionsOpen: false,
       isDesc: true, // default order: newest first
     };
@@ -374,8 +394,13 @@ export default {
       this.$emit('order', this.isDesc ? 'desc' : 'asc');
     },
     emitFilters() {
-      // emit combined filters for rank/status along with current mode
-      this.$emit('filter', { mode: this.currentMode, rank: this.currentRankFilter, status: this.currentStatusFilter });
+      // emit combined filters including rank/status/search along with current mode
+      this.$emit('filter', { mode: this.currentMode, rank: this.currentRankFilter, status: this.currentStatusFilter, search: (this.searchTerm || '').trim() });
+    },
+    setSearch(val) {
+      // keep local state already updated via v-model; emit filters to parent
+      this.searchTerm = val;
+      this.emitFilters();
     },
     setRankFilter(val) {
       this.currentRankFilter = val;
@@ -516,10 +541,11 @@ export default {
       }
     },
     resetFilters() {
-      // Reset to defaults: mode active, no rank/status filters
+      // Reset to defaults: mode active, no rank/status filters, clear search
       this.currentMode = 'active';
       this.currentRankFilter = '';
       this.currentStatusFilter = '';
+      this.searchTerm = '';
       // Emit legacy event for view mode and combined filters for consumers
       this.$emit('viewMode', 'active');
       this.emitFilters();
@@ -613,9 +639,17 @@ export default {
   .mobile-actions { display: flex; }
 }
 
-.HeaderToolbar .q-btn {
+ .HeaderToolbar .q-btn {
   margin-left: 2px;
   margin-right: 2px;
+}
+
+/* Search area aligned to the left */
+.header-search {
+  flex: 0 1 520px;
+  max-width: 520px;
+  margin-left: 0;
+  margin-right: auto;
 }
 
 /* Mobile slide-down actions panel */

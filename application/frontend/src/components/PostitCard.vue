@@ -50,8 +50,22 @@
       </q-card-section>
       <transition name="card-expand">
         <q-card-section v-show="this.showNote" class="q-pt-none text-black card-content">
-          <template v-for="note in this.notes_by_line" :key="note">
-            <span class="note-line">{{ note }}</span>
+          <template v-for="(note, idx) in this.notes_by_line" :key="'line-'+idx">
+            <div class="note-row row items-center no-wrap justify-between">
+              <span class="note-line text-black">{{ note }}</span>
+              <q-btn
+                flat
+                dense
+                round
+                icon="content_copy"
+                color="black"
+                size="sm"
+                @click.stop="copyLine(note)"
+                :aria-label="'Copy line ' + (idx + 1)"
+              >
+                <q-tooltip anchor="top middle" self="bottom middle" class="bg-grey-9 text-white">Copy</q-tooltip>
+              </q-btn>
+            </div>
             <hr />
           </template>
           <div class="card-footer row items-center justify-between no-wrap q-mt-sm">
@@ -122,6 +136,7 @@
 </template>
 <script>
 import axios from "axios";
+import { copyToClipboard } from "quasar";
 // axios.defaults.baseURL = "https://notedflow.com";
 // axios.defaults.baseURL = "http://127.0.0.1:5000";
 import MinimalStars from './MinimalStars.vue';
@@ -298,6 +313,17 @@ export default {
         });
     },
 
+    copyLine(line) {
+      try {
+        const text = (line === null || line === undefined) ? '' : String(line);
+        if (!text) return;
+        // Quasar utility returns a Promise
+        copyToClipboard(text).catch(() => {});
+      } catch (e) {
+        // no-op
+      }
+    },
+
     deleteNote() {
       const workspace_id = this.$route.query?.workspace_id;
       const params = {
@@ -377,6 +403,10 @@ export default {
   margin-top: 8px;
   text-align: right;
 }
+
+/* Line rows inside expanded card */
+.note-row { width: 100%; }
+.note-line { flex: 1 1 auto; margin-right: 8px; white-space: pre-wrap; word-break: break-word; }
 
 /* Ensure flex children can shrink and cards don't overflow */
 .PostitMain { min-width: 0; }

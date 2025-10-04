@@ -38,17 +38,40 @@ def list_postits_app():
     """Return JSON list of notes for current workspace (and the workspace id).
 
     Be lenient with incoming query param names to support various frontend emitters.
-    Accepts keys like: mode | filter[mode] | filter.mode | currentMode; similarly for rank/status.
+    Accepts keys like: mode | filter[mode] | filter.mode | currentMode; similarly for rank/status and search.
     """
     # Resolve possible param name variations
-    mode = request.args.get('mode[mode]') or ''
-    rank = request.args.get('mode[rank]')
-    status = request.args.get('mode[status]')
+    mode = (
+        request.args.get('mode')
+        or request.args.get('filter[mode]')
+        or request.args.get('filter.mode')
+        or request.args.get('currentMode')
+        or ''
+    )
+    rank = (
+        request.args.get('rank')
+        or request.args.get('filter[rank]')
+        or request.args.get('filter.rank')
+        or request.args.get('currentRankFilter')
+    )
+    status = (
+        request.args.get('status')
+        or request.args.get('filter[status]')
+        or request.args.get('filter.status')
+        or request.args.get('currentStatusFilter')
+    )
+    search = (
+        request.args.get('search')
+        or request.args.get('q')
+        or request.args.get('query')
+        or request.args.get('filter[search]')
+        or request.args.get('filter.search')
+    )
 
     workspace_uuid = WorkspaceUtils.get_workspace_id()
     response = {
         'workspace_id': workspace_uuid,
-        'postits': WorkspaceUtils.get_workspace_notes(workspace_uuid=workspace_uuid, mode=mode, rank=rank, status=status),
+        'postits': WorkspaceUtils.get_workspace_notes(workspace_uuid=workspace_uuid, mode=mode, rank=rank, status=status, search=search),
     }
     return jsonify(response)
 
