@@ -218,7 +218,7 @@ export default {
         note: this.note,
         color: this.color,
       };
-      axios.get(`app/edit-note`, { params }, { withCredentials: true })
+      axios.get(`/app/edit-note/`, { params, withCredentials: true })
           .then((response) => {
             if (response.status === 200) {
               this.editNoteDialog = false;
@@ -237,7 +237,7 @@ export default {
         note_id: this.postit.uuid,
       };
       axios
-        .get(`app/delete-note/`, { params }, { withCredentials: true })
+        .get(`/app/delete-note/`, { params, withCredentials: true })
         .then((response) => {
           if (response.status === 200) {
             this.editNoteDialog = false;
@@ -255,7 +255,7 @@ export default {
         note_id: this.postit.uuid,
       };
       axios
-        .get(`app/disable-note/`, { params }, { withCredentials: true })
+        .get(`/app/disable-note/`, { params, withCredentials: true })
         .then((response) => {
           if (response.status === 200) {
             this.editNoteDialog = false;

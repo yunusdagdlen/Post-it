@@ -463,7 +463,7 @@ export default {
         .then((result) => {
           if (result.isConfirmed) {
             axios
-              .get('app/clear-workspace')
+              .get('/app/clear-workspace', { withCredentials: true })
               .then(() => { window.location.href = '/app'; })
               .catch(() => { window.location.href = '/app'; });
           }
