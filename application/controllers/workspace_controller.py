@@ -34,28 +34,6 @@ def index():
     return render_template('app/index.html')
 
 
-@mod_pages.route('/edit-note', methods=['POST', 'GET'])
-def edit_note():
-    """Legacy edit endpoint; maintains original semantics including redirects."""
-    if request.method == 'GET':
-        title = request.args.get('title', '')
-        note = request.args.get('note', '')
-        uuid = request.args.get('note_id')
-        workspace_uuid = WorkspaceUtils.get_workspace_id()
-        if title or note:
-            title = bleach.clean(title).replace('&amp;', '&')
-            note = bleach.clean(note).replace('&amp;', '&')
-            respnse = WorkspaceUtils.edit_note(title, note, uuid, workspace_uuid)
-            if respnse['is_success']:
-                return redirect(f'/app?workspace_id={workspace_uuid}')
-            else:
-                'hata sayfası'
-        else:
-            return 'hata sayfası'
-    else:
-        abort(make_response("Not Found", 404))
-
-
 @mod_pages.route('/back', methods=['POST', 'GET'])
 def back():
     """Back helper to index."""
@@ -144,4 +122,3 @@ def clear_workspace():
     """Clear workspace id from session."""
     session.pop('workspace_id', None)
     return jsonify({'is_success': True})
-

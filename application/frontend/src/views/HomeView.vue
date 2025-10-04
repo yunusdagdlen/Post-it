@@ -144,7 +144,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  justify-content: flex-start;
+  justify-content: center;
   gap: 12px;
   width: 100%;
   box-sizing: border-box;
@@ -156,7 +156,7 @@ export default {
     flex-direction: row;
     flex-wrap: wrap;
     align-items: stretch;
-    justify-content: flex-start; /* prevent recentering when a card height changes */
+    justify-content: center; /* prevent recentering when a card height changes */
     gap: 12px;
   }
   .cards-list > .PostitMain {
@@ -166,7 +166,7 @@ export default {
   }
 }
 @media (min-width: 1280px) {
-  .cards-list { justify-content: flex-start; }
+  .cards-list { justify-content: center; }
   .cards-list > .PostitMain { flex-basis: 360px; }
 }
 
