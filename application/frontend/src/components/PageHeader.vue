@@ -250,38 +250,16 @@
         <div class="picker-grid">
           <!-- Color picker: preset swatches -->
           <div class="picker-block">
-            <div class="text-caption text-grey-7 q-mb-sm">Color</div>
-            <div class="row items-center q-gutter-sm">
-              <div
-                v-for="c in presetColors"
-                :key="c"
-                class="color-swatch"
-                :style="{ background: c, outlineColor: c }"
-                :aria-label="'Select color ' + c"
-                :class="{ selected: color === c }"
-                role="button"
-                tabindex="0"
-                @click="color = c"
-                @keydown.enter.prevent="color = c"
-              >
-                <q-icon v-if="color === c" name="check" color="white" size="16px" />
-              </div>
-            </div>
+            <ColorSwatches v-model="color" :options="presetColors" label="Color" />
           </div>
 
           <!-- Rank picker: 5-star selection -->
           <div class="picker-block rank-block">
             <div class="row items-center no-wrap">
-              <q-rating
+              <MinimalStars
                 v-model="newRank"
-                max="5"
+                :max="5"
                 size="28px"
-                color="amber"
-                void-color="grey-4"
-                icon="star_border"
-                icon-selected="star"
-                no-half
-                aria-label="Rank by stars"
                 class="minimal-stars"
               />
             </div>
@@ -300,12 +278,15 @@
 <script>
 import axios from "axios";
 import { copyToClipboard } from "quasar";
+import MinimalStars from './MinimalStars.vue';
+import ColorSwatches from './ColorSwatches.vue';
 
 //axios.defaults.baseURL = "https://notedflow.com";
 //axios.defaults.baseURL = "http://127.0.0.1:5000";
 
 export default {
   name: "PageHeader",
+  components: { MinimalStars, ColorSwatches },
   data() {
     return {
       workspace_id: this.$route.query?.workspace_id,

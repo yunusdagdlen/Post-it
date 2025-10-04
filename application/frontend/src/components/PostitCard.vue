@@ -21,22 +21,12 @@
           <div class="col-9">
             <div class="text-h6 text-black">{{ this.title }}</div>
             <div class="q-mt-xs rank-inline">
-              <q-rating
+              <MinimalStars
                 v-model="cardRank"
-                max="5"
+                :max="5"
                 size="22px"
-                color="amber"
-                void-color="grey-4"
-                icon="star_border"
-                icon-selected="star"
-                no-half
-                aria-label="Rank by stars"
                 class="minimal-stars"
                 @update:model-value="updateRank"
-                @click.stop
-                @mousedown.stop
-                @touchstart.stop
-                @pointerdown.stop
               />
             </div>
           </div>
@@ -45,56 +35,16 @@
             class="col-3"
             style="display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-start; gap: 6px;"
           >
-            <q-btn rounded flat dense icon="mdi-menu" color="black" @click.stop @touchstart.stop @mousedown.stop @pointerdown.stop>
-              <q-menu fit anchor="bottom right" self="top right">
-                <div class="row no-wrap q-pa-sm">
-                  <div class="column">
-                    <q-btn
-                      size="sm"
-                      flat
-                      outline
-                      rounded
-                      align="left"
-                      color="grey-7"
-                      icon="edit"
-                      label="Edit"
-                      @click="this.editNoteDialog = true"
-                    />
-                    <q-btn
-                      flat
-                      outline
-                      rounded
-                      align="left"
-                      color="grey-7"
-                      icon="delete"
-                      label="Delete"
-                      size="sm"
-                      @click="deleteNote"
-                    />
-                    <q-btn
-                      flat
-                      outline
-                      rounded
-                      align="left"
-                      color="grey-7"
-                      icon="block"
-                      label="Disable"
-                      size="sm"
-                      @click="disableNote"
-                    />
-                  </div>
-                </div>
-              </q-menu>
-            </q-btn>
-            <q-icon
-              v-if="((currentStatus === 2) || (currentStatus === undefined && postit && postit.status === 2))"
-              name="check_circle"
+            <CardMenu
+              @edit="this.editNoteDialog = true"
+              @delete="deleteNote"
+              @disable="disableNote"
+            />
+            <DoneCheck
+              :show="((currentStatus === 2) || (currentStatus === undefined && postit && postit.status === 2))"
               color="black"
               size="20px"
-              @click.stop.prevent
-            >
-              <q-tooltip anchor="top middle" self="bottom middle" class="bg-grey-9 text-white">congrats you finished this</q-tooltip>
-            </q-icon>
+            />
           </div>
         </div>
       </q-card-section>
@@ -106,33 +56,10 @@
           </template>
           <div class="card-footer row items-center justify-between no-wrap q-mt-sm">
             <div class="status-left">
-              <q-btn
-                flat
-                dense
-                size="sm"
-                class="status-chip"
-                :color="statusTextColor"
-                :icon="statusIcon"
-                :label="displayStatus"
-                @click.stop
-              >
-                <q-menu anchor="top left" self="bottom left">
-                  <q-list style="min-width: 160px">
-                    <q-item clickable v-close-popup @click.stop="updateStatus(0)">
-                      <q-item-section avatar><q-icon name="fiber_new" :color="currentStatus===0 ? 'primary' : 'grey-6'" /></q-item-section>
-                      <q-item-section>New</q-item-section>
-                    </q-item>
-                    <q-item clickable v-close-popup @click.stop="updateStatus(1)">
-                      <q-item-section avatar><q-icon name="autorenew" :color="currentStatus===1 ? 'primary' : 'grey-6'" /></q-item-section>
-                      <q-item-section>In progress</q-item-section>
-                    </q-item>
-                    <q-item clickable v-close-popup @click.stop="updateStatus(2)">
-                      <q-item-section avatar><q-icon name="check_circle" :color="currentStatus===2 ? 'primary' : 'grey-6'" /></q-item-section>
-                      <q-item-section>Done</q-item-section>
-                    </q-item>
-                  </q-list>
-                </q-menu>
-              </q-btn>
+              <StatusPicker
+                v-model="currentStatus"
+                @update:modelValue="val => updateStatus(val)"
+              />
             </div>
             <div v-if="formattedCreatedAt" class="created-at text-black">{{ formattedCreatedAt }}</div>
           </div>
@@ -170,38 +97,16 @@
         <div class="picker-grid">
           <!-- Color picker: preset swatches -->
           <div class="picker-block">
-            <div class="text-caption text-grey-7 q-mb-sm">Color</div>
-            <div class="row items-center q-gutter-sm">
-              <div
-                v-for="c in presetColors"
-                :key="c"
-                class="color-swatch"
-                :style="{ background: c, outlineColor: c }"
-                :aria-label="'Select color ' + c"
-                :class="{ selected: color === c }"
-                role="button"
-                tabindex="0"
-                @click="color = c"
-                @keydown.enter.prevent="color = c"
-              >
-                <q-icon v-if="color === c" name="check" color="white" size="16px" />
-              </div>
-            </div>
+            <ColorSwatches v-model="color" :options="presetColors" label="Color" />
           </div>
 
           <!-- Rank picker: 5-star selection -->
           <div class="picker-block rank-block">
             <div class="row items-center no-wrap">
-              <q-rating
+              <MinimalStars
                 v-model="editRank"
-                max="5"
+                :max="5"
                 size="28px"
-                color="amber"
-                void-color="grey-4"
-                icon="star_border"
-                icon-selected="star"
-                no-half
-                aria-label="Rank by stars"
                 class="minimal-stars"
               />
             </div>
@@ -219,8 +124,14 @@
 import axios from "axios";
 // axios.defaults.baseURL = "https://notedflow.com";
 // axios.defaults.baseURL = "http://127.0.0.1:5000";
+import MinimalStars from './MinimalStars.vue';
+import StatusPicker from './StatusPicker.vue';
+import ColorSwatches from './ColorSwatches.vue';
+import CardMenu from './CardMenu.vue';
+import DoneCheck from './DoneCheck.vue';
 
 export default {
+  components: { MinimalStars, StatusPicker, ColorSwatches, CardMenu, DoneCheck },
   data() {
     return {
       editNoteDialog: false,
