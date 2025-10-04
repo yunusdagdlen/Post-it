@@ -9,7 +9,7 @@
         border-radius: 15px;
         align-items: center;
       "
-      @click="showNote = !this.showNote"
+      @click="onCardClick"
       :style="{
         background: postit?.extra_info?.postit_color ? postit?.extra_info?.postit_color : '#59a5d8',
         opacity: this.active ? 1 : 0.5
@@ -18,15 +18,34 @@
       <!--default view -->
       <q-card-section>
         <div class="row">
-          <div class="text-h6 text-black col-9">
-            {{ this.title }}
+          <div class="col-9">
+            <div class="text-h6 text-black">{{ this.title }}</div>
+            <div class="q-mt-xs rank-inline">
+              <q-rating
+                v-model="cardRank"
+                max="5"
+                size="22px"
+                color="amber"
+                void-color="grey-4"
+                icon="star_border"
+                icon-selected="star"
+                no-half
+                aria-label="Rank by stars"
+                class="minimal-stars"
+                @update:model-value="updateRank"
+                @click.stop
+                @mousedown.stop
+                @touchstart.stop
+                @pointerdown.stop
+              />
+            </div>
           </div>
           <q-space />
           <div
             class="col-3"
-            style="display: flex; align-items: baseline; justify-content: end"
+            style="display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-start; gap: 6px;"
           >
-            <q-btn rounded flat dense icon="mdi-menu" color="black">
+            <q-btn rounded flat dense icon="mdi-menu" color="black" @click.stop @touchstart.stop @mousedown.stop @pointerdown.stop>
               <q-menu fit anchor="bottom right" self="top right">
                 <div class="row no-wrap q-pa-sm">
                   <div class="column">
@@ -67,6 +86,15 @@
                 </div>
               </q-menu>
             </q-btn>
+            <q-icon
+              v-if="((currentStatus === 2) || (currentStatus === undefined && postit && postit.status === 2))"
+              name="check_circle"
+              color="black"
+              size="20px"
+              @click.stop.prevent
+            >
+              <q-tooltip anchor="top middle" self="bottom middle" class="bg-grey-9 text-white">congrats you finished this</q-tooltip>
+            </q-icon>
           </div>
         </div>
       </q-card-section>
@@ -76,7 +104,38 @@
             <span class="note-line">{{ note }}</span>
             <hr />
           </template>
-          <div v-if="formattedCreatedAt" class="created-at text-black">{{ formattedCreatedAt }}</div>
+          <div class="card-footer row items-center justify-between no-wrap q-mt-sm">
+            <div class="status-left">
+              <q-btn
+                flat
+                dense
+                size="sm"
+                class="status-chip"
+                :color="statusTextColor"
+                :icon="statusIcon"
+                :label="displayStatus"
+                @click.stop
+              >
+                <q-menu anchor="top left" self="bottom left">
+                  <q-list style="min-width: 160px">
+                    <q-item clickable v-close-popup @click.stop="updateStatus(0)">
+                      <q-item-section avatar><q-icon name="fiber_new" :color="currentStatus===0 ? 'primary' : 'grey-6'" /></q-item-section>
+                      <q-item-section>New</q-item-section>
+                    </q-item>
+                    <q-item clickable v-close-popup @click.stop="updateStatus(1)">
+                      <q-item-section avatar><q-icon name="autorenew" :color="currentStatus===1 ? 'primary' : 'grey-6'" /></q-item-section>
+                      <q-item-section>In progress</q-item-section>
+                    </q-item>
+                    <q-item clickable v-close-popup @click.stop="updateStatus(2)">
+                      <q-item-section avatar><q-icon name="check_circle" :color="currentStatus===2 ? 'primary' : 'grey-6'" /></q-item-section>
+                      <q-item-section>Done</q-item-section>
+                    </q-item>
+                  </q-list>
+                </q-menu>
+              </q-btn>
+            </div>
+            <div v-if="formattedCreatedAt" class="created-at text-black">{{ formattedCreatedAt }}</div>
+          </div>
         </q-card-section>
       </transition>
     </q-card>
@@ -96,9 +155,6 @@
           <q-btn flat round dense icon="close" v-close-popup />
         </div>
       </q-card-section>
-      <q-card-section class="q-pt-sm">
-        <q-input v-model="title" label="Title" filled standout="bg-grey-2 text-dark" dense />
-      </q-card-section>
       <q-card-section class="q-pt-none">
         <q-input
           v-model="note"
@@ -109,23 +165,46 @@
           autogrow
         />
       </q-card-section>
-      <!-- Color picker: preset swatches -->
+      <!-- Color & Rank pickers (responsive, match add note modal) -->
       <q-card-section class="q-pt-none q-px-md">
-        <div class="text-caption text-grey-7 q-mb-sm">Color</div>
-        <div class="row items-center q-gutter-sm">
-          <div
-            v-for="c in presetColors"
-            :key="c"
-            class="color-swatch"
-            :style="{ background: c, outlineColor: c }"
-            :aria-label="'Select color ' + c"
-            :class="{ selected: color === c }"
-            role="button"
-            tabindex="0"
-            @click="color = c"
-            @keydown.enter.prevent="color = c"
-          >
-            <q-icon v-if="color === c" name="check" color="white" size="16px" />
+        <div class="picker-grid">
+          <!-- Color picker: preset swatches -->
+          <div class="picker-block">
+            <div class="text-caption text-grey-7 q-mb-sm">Color</div>
+            <div class="row items-center q-gutter-sm">
+              <div
+                v-for="c in presetColors"
+                :key="c"
+                class="color-swatch"
+                :style="{ background: c, outlineColor: c }"
+                :aria-label="'Select color ' + c"
+                :class="{ selected: color === c }"
+                role="button"
+                tabindex="0"
+                @click="color = c"
+                @keydown.enter.prevent="color = c"
+              >
+                <q-icon v-if="color === c" name="check" color="white" size="16px" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Rank picker: 5-star selection -->
+          <div class="picker-block rank-block">
+            <div class="row items-center no-wrap">
+              <q-rating
+                v-model="editRank"
+                max="5"
+                size="28px"
+                color="amber"
+                void-color="grey-4"
+                icon="star_border"
+                icon-selected="star"
+                no-half
+                aria-label="Rank by stars"
+                class="minimal-stars"
+              />
+            </div>
           </div>
         </div>
       </q-card-section>
@@ -148,6 +227,9 @@ export default {
       title: this.postit.title,
       note: this.postit.note,
       color: (this.postit && this.postit.extra_info && this.postit.extra_info.postit_color) ? this.postit.extra_info.postit_color : '#4dabf7',
+      editRank: (this.postit && this.postit.rank !== null && this.postit.rank !== undefined && this.postit.rank !== '') ? this.postit.rank : 1,
+      cardRank: (this.postit && this.postit.rank !== null && this.postit.rank !== undefined && this.postit.rank !== '') ? this.postit.rank : 1,
+      currentStatus: (this.postit && this.postit.status !== null && this.postit.status !== undefined && this.postit.status !== '') ? this.postit.status : 0,
       presetColors: ["#29bf12", "#abff4f", "#08bdbd", "#ff9914", "#4dabf7", "#845ef7", "#e64980", "#ffa94d"],
       active: this.postit.active,
       notes_by_line: this.postit.notes_by_line,
@@ -170,6 +252,8 @@ export default {
         this.title = this.postit.title;
         this.note = this.postit.note;
         this.color = (this.postit && this.postit.extra_info && this.postit.extra_info.postit_color) ? this.postit.extra_info.postit_color : this.color;
+        const r = this.postit ? this.postit.rank : undefined;
+        this.editRank = (r === null || r === undefined || r === '') ? 1 : r;
       }
     }
   },
@@ -182,9 +266,38 @@ export default {
         if (isNaN(d.getTime())) return '';
         return `${d.toLocaleDateString()} ${d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
       } catch (e) { return ''; }
+    },
+    displayRank() {
+      const r = this.postit ? this.postit.rank : undefined;
+      return (r === null || r === undefined || r === '') ? 1 : r;
+    },
+    displayStatus() {
+      const s = (this.currentStatus === null || this.currentStatus === undefined || this.currentStatus === '') ? 0 : this.currentStatus;
+      return s === 2 ? 'Done' : (s === 1 ? 'In progress' : 'New');
+    },
+    statusIcon() {
+      const s = (this.currentStatus === null || this.currentStatus === undefined || this.currentStatus === '') ? 0 : this.currentStatus;
+      return s === 2 ? 'check_circle' : (s === 1 ? 'autorenew' : 'fiber_new');
+    },
+    statusTextColor() {
+      // keep neutral readable color; background is handled by .status-chip style
+      return 'grey-9';
     }
   },
   methods: {
+    onCardClick() {
+      const wasOpen = this.showNote;
+      this.showNote = !this.showNote;
+      if (!wasOpen && this.showNote) {
+        // when opening first time, if status is NEW (0), set to In progress (1) silently (no list reload)
+        const s = (this.currentStatus === null || this.currentStatus === undefined)
+          ? (this.postit && this.postit.status !== undefined ? this.postit.status : 0)
+          : this.currentStatus;
+        if (s === 0) {
+          this.updateStatus(1, { silent: true });
+        }
+      }
+    },
     // editNote() {
     //   const workspace_id = this.$route.query?.workspace_id;
     //
@@ -217,6 +330,7 @@ export default {
         title: this.title,
         note: this.note,
         color: this.color,
+        rank: this.editRank,
       };
       axios.get(`/app/edit-note/`, { params, withCredentials: true })
           .then((response) => {
@@ -228,6 +342,49 @@ export default {
           .catch((error) => {
             console.log(error);
           });
+    },
+
+    updateRank(val) {
+      const workspace_id = this.$route.query?.workspace_id;
+      const params = {
+        workspace_id: workspace_id,
+        note_id: this.postit.uuid,
+        rank: val,
+      };
+      axios.get(`/app/edit-note/`, { params, withCredentials: true })
+        .then((response) => {
+          if (response.status === 200) {
+            this.cardRank = val;
+            // optionally refresh parent list
+            this.$emit('ok');
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
+
+    updateStatus(val, options = {}) {
+      const workspace_id = this.$route.query?.workspace_id;
+      const params = {
+        workspace_id: workspace_id,
+        note_id: this.postit.uuid,
+        status: val,
+      };
+      // Optimistically update UI immediately
+      this.currentStatus = val;
+      const isSilent = options && options.silent === true;
+      // Fire request without blocking UI; emit refresh only if not silent
+      axios.get(`/app/edit-note/`, { params, withCredentials: true })
+        .then((response) => {
+          if (!isSilent && response && response.status === 200) {
+            // notify parent to refresh list; avoid mutating props directly
+            this.$emit('ok');
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     },
 
     deleteNote() {
@@ -283,6 +440,7 @@ export default {
   box-shadow: 0 10px 24px rgba(31, 45, 61, 0.12);
   transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.2s ease;
   border: 1px solid rgba(255, 255, 255, 0.35);
+  position: relative;
 }
 
 .PostitMain .q-card:hover {
@@ -311,7 +469,7 @@ export default {
 
 /* Ensure flex children can shrink and cards don't overflow */
 .PostitMain { min-width: 0; }
-.PostitMain .q-card { max-width: 100%; min-width: 0; box-sizing: border-box; }
+.PostitMain .q-card { max-width: 100%; min-width: 260px; box-sizing: border-box; }
 
 /* Robust text wrapping for titles and note content */
 /* Title should break by words, not inside words */
@@ -378,4 +536,66 @@ export default {
 .color-swatch.selected {
   box-shadow: 0 0 0 2px rgba(255,255,255,0.9) inset, 0 0 0 3px rgba(0,0,0,0.08), 0 6px 14px rgba(0,0,0,0.18);
 }
+
+/* Minimal star style to remove shadows/glows for rating icons and force single-line layout */
+.minimal-stars {
+  display: inline-flex;
+  flex-wrap: nowrap;
+}
+.minimal-stars .q-rating__icon,
+.minimal-stars .q-rating__icon:before,
+.minimal-stars .q-rating__icon--selected,
+.minimal-stars .q-focus-helper {
+  text-shadow: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
 </style>
+
+
+<style scoped>
+/* Responsive layout for color and rank pickers (match add note modal) */
+.picker-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  row-gap: 12px;
+}
+@media (min-width: 768px) {
+  .picker-grid {
+    grid-template-columns: 1fr auto;
+    column-gap: 16px;
+    align-items: end;
+  }
+  .rank-block { justify-self: start; }
+}
+</style>
+
+
+<style scoped>
+/* Keep the star row under the title always on a single line */
+.rank-inline { white-space: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+</style>
+
+
+<style scoped>
+/* Footer row with status (left) and date (right) */
+.card-footer { font-size: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; }
+/* Minimal, background-less status trigger */
+.status-chip {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  line-height: 18px;
+  color: #1f2d3d;
+  min-height: 0;
+  box-shadow: none;
+}
+/* Tidy up icon/text spacing and add subtle affordance on hover */
+.status-chip .q-icon { font-size: 16px; }
+.status-chip:hover { text-decoration: underline; }
+/* Ensure clicks on the status chip don't propagate to card */
+.status-chip, .status-chip * { pointer-events: auto; }
+</style>
+
+

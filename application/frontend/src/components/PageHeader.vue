@@ -64,7 +64,12 @@
             aria-label="Filter"
             content-class="viewmode-menu"
           >
-            <q-list style="min-width: 140px">
+            <q-list style="min-width: 200px">
+              <q-item clickable v-close-popup @click="resetFilters()">
+                <q-item-section avatar><q-icon name="filter_alt_off" color="grey-7" /></q-item-section>
+                <q-item-section>Reset filters</q-item-section>
+              </q-item>
+              <q-separator spaced inset />
               <q-item clickable v-close-popup @click="setViewMode('active')">
                 <q-item-section avatar><q-icon name="check_circle" :color="currentMode==='active' ? 'primary' : 'grey-5'" /></q-item-section>
                 <q-item-section>Active</q-item-section>
@@ -77,6 +82,36 @@
               <q-item clickable v-close-popup @click="setViewMode('all')">
                 <q-item-section avatar><q-icon name="layers" :color="currentMode==='all' ? 'primary' : 'grey-5'" /></q-item-section>
                 <q-item-section>All</q-item-section>
+              </q-item>
+
+              <q-separator spaced inset />
+              <q-item-label header class="text-caption text-grey-7">Rank</q-item-label>
+              <q-item clickable v-close-popup @click="setRankFilter('')">
+                <q-item-section avatar><q-icon name="clear_all" :color="currentRankFilter==='' ? 'primary' : 'grey-5'" /></q-item-section>
+                <q-item-section>All ranks</q-item-section>
+              </q-item>
+              <q-item v-for="r in [1,2,3,4,5]" :key="'rank-'+r" clickable v-close-popup @click="setRankFilter(r)">
+                <q-item-section avatar><q-icon name="grade" :color="currentRankFilter===r ? 'amber' : 'grey-5'" /></q-item-section>
+                <q-item-section>{{ r }} star{{ r>1 ? 's' : '' }}</q-item-section>
+              </q-item>
+
+              <q-separator spaced inset />
+              <q-item-label header class="text-caption text-grey-7">Status</q-item-label>
+              <q-item clickable v-close-popup @click="setStatusFilter('')">
+                <q-item-section avatar><q-icon name="clear_all" :color="currentStatusFilter==='' ? 'primary' : 'grey-5'" /></q-item-section>
+                <q-item-section>All statuses</q-item-section>
+              </q-item>
+              <q-item clickable v-close-popup @click="setStatusFilter(0)">
+                <q-item-section avatar><q-icon name="fiber_new" :color="currentStatusFilter===0 ? 'primary' : 'grey-5'" /></q-item-section>
+                <q-item-section>New</q-item-section>
+              </q-item>
+              <q-item clickable v-close-popup @click="setStatusFilter(1)">
+                <q-item-section avatar><q-icon name="autorenew" :color="currentStatusFilter===1 ? 'primary' : 'grey-5'" /></q-item-section>
+                <q-item-section>In progress</q-item-section>
+              </q-item>
+              <q-item clickable v-close-popup @click="setStatusFilter(2)">
+                <q-item-section avatar><q-icon name="check_circle" :color="currentStatusFilter===2 ? 'primary' : 'grey-5'" /></q-item-section>
+                <q-item-section>Done</q-item-section>
               </q-item>
             </q-list>
             <q-tooltip anchor="bottom middle" self="top middle" class="bg-grey-9 text-white">Filter</q-tooltip>
@@ -118,6 +153,11 @@
             </q-item>
             <q-expansion-item expand-separator icon="filter_alt" label="Filter" header-class="text-body1">
               <q-list>
+                <q-item clickable @click="mobileActionsOpen=false; resetFilters()">
+                  <q-item-section avatar><q-icon name="filter_alt_off" color="grey-7" /></q-item-section>
+                  <q-item-section>Reset filters</q-item-section>
+                </q-item>
+                <q-separator spaced inset />
                 <q-item clickable @click="mobileActionsOpen=false; setViewMode('active')">
                   <q-item-section avatar><q-icon name="check_circle" :color="currentMode==='active' ? 'primary' : 'grey-5'" /></q-item-section>
                   <q-item-section>Active</q-item-section>
@@ -129,6 +169,36 @@
                 <q-item clickable @click="mobileActionsOpen=false; setViewMode('all')">
                   <q-item-section avatar><q-icon name="layers" :color="currentMode==='all' ? 'primary' : 'grey-5'" /></q-item-section>
                   <q-item-section>All</q-item-section>
+                </q-item>
+
+                <q-separator spaced inset />
+                <q-item-label header class="text-caption text-grey-7">Rank</q-item-label>
+                <q-item clickable @click="mobileActionsOpen=false; setRankFilter('')">
+                  <q-item-section avatar><q-icon name="clear_all" :color="currentRankFilter==='' ? 'primary' : 'grey-5'" /></q-item-section>
+                  <q-item-section>All ranks</q-item-section>
+                </q-item>
+                <q-item v-for="r in [1,2,3,4,5]" :key="'m-rank-'+r" clickable @click="mobileActionsOpen=false; setRankFilter(r)">
+                  <q-item-section avatar><q-icon name="grade" :color="currentRankFilter===r ? 'amber' : 'grey-5'" /></q-item-section>
+                  <q-item-section>{{ r }} star{{ r>1 ? 's' : '' }}</q-item-section>
+                </q-item>
+
+                <q-separator spaced inset />
+                <q-item-label header class="text-caption text-grey-7">Status</q-item-label>
+                <q-item clickable @click="mobileActionsOpen=false; setStatusFilter('')">
+                  <q-item-section avatar><q-icon name="clear_all" :color="currentStatusFilter==='' ? 'primary' : 'grey-5'" /></q-item-section>
+                  <q-item-section>All statuses</q-item-section>
+                </q-item>
+                <q-item clickable @click="mobileActionsOpen=false; setStatusFilter(0)">
+                  <q-item-section avatar><q-icon name="fiber_new" :color="currentStatusFilter===0 ? 'primary' : 'grey-5'" /></q-item-section>
+                  <q-item-section>New</q-item-section>
+                </q-item>
+                <q-item clickable @click="mobileActionsOpen=false; setStatusFilter(1)">
+                  <q-item-section avatar><q-icon name="autorenew" :color="currentStatusFilter===1 ? 'primary' : 'grey-5'" /></q-item-section>
+                  <q-item-section>In progress</q-item-section>
+                </q-item>
+                <q-item clickable @click="mobileActionsOpen=false; setStatusFilter(2)">
+                  <q-item-section avatar><q-icon name="check_circle" :color="currentStatusFilter===2 ? 'primary' : 'grey-5'" /></q-item-section>
+                  <q-item-section>Done</q-item-section>
                 </q-item>
               </q-list>
             </q-expansion-item>
@@ -175,23 +245,46 @@
         />
       </q-card-section>
 
-      <!-- Color picker: preset swatches -->
+      <!-- Color & Rank pickers (responsive) -->
       <q-card-section class="q-pt-none q-px-md">
-        <div class="text-caption text-grey-7 q-mb-sm">Color</div>
-        <div class="row items-center q-gutter-sm">
-          <div
-            v-for="c in presetColors"
-            :key="c"
-            class="color-swatch"
-            :style="{ background: c, outlineColor: c }"
-            :aria-label="'Select color ' + c"
-            :class="{ selected: color === c }"
-            role="button"
-            tabindex="0"
-            @click="color = c"
-            @keydown.enter.prevent="color = c"
-          >
-            <q-icon v-if="color === c" name="check" color="white" size="16px" />
+        <div class="picker-grid">
+          <!-- Color picker: preset swatches -->
+          <div class="picker-block">
+            <div class="text-caption text-grey-7 q-mb-sm">Color</div>
+            <div class="row items-center q-gutter-sm">
+              <div
+                v-for="c in presetColors"
+                :key="c"
+                class="color-swatch"
+                :style="{ background: c, outlineColor: c }"
+                :aria-label="'Select color ' + c"
+                :class="{ selected: color === c }"
+                role="button"
+                tabindex="0"
+                @click="color = c"
+                @keydown.enter.prevent="color = c"
+              >
+                <q-icon v-if="color === c" name="check" color="white" size="16px" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Rank picker: 5-star selection -->
+          <div class="picker-block rank-block">
+            <div class="row items-center no-wrap">
+              <q-rating
+                v-model="newRank"
+                max="5"
+                size="28px"
+                color="amber"
+                void-color="grey-4"
+                icon="star_border"
+                icon-selected="star"
+                no-half
+                aria-label="Rank by stars"
+                class="minimal-stars"
+              />
+            </div>
           </div>
         </div>
       </q-card-section>
@@ -221,8 +314,11 @@ export default {
       content: "",
       title: "",
       color: "",
+      newRank: 1,
       presetColors: ["#29bf12", "#abff4f", "#08bdbd", "#ff9914", "#4dabf7", "#845ef7", "#e64980", "#ffa94d"],
       currentMode: 'active',
+      currentRankFilter: '',
+      currentStatusFilter: '',
       mobileActionsOpen: false,
       isDesc: true, // default order: newest first
     };
@@ -289,10 +385,24 @@ export default {
       // Emit new event name and legacy one for compatibility
       this.$emit('filter', mode);
       this.$emit('viewMode', mode);
+      // Also emit combined filter payload for new consumers
+      this.emitFilters();
     },
     toggleOrder() {
       this.isDesc = !this.isDesc;
       this.$emit('order', this.isDesc ? 'desc' : 'asc');
+    },
+    emitFilters() {
+      // emit combined filters for rank/status along with current mode
+      this.$emit('filter', { mode: this.currentMode, rank: this.currentRankFilter, status: this.currentStatusFilter });
+    },
+    setRankFilter(val) {
+      this.currentRankFilter = val;
+      this.emitFilters();
+    },
+    setStatusFilter(val) {
+      this.currentStatusFilter = val;
+      this.emitFilters();
     },
     toggleView() {
       const wid = this.$route.query?.workspace_id || this.workspace_id;
@@ -324,6 +434,7 @@ export default {
         title: this.title,
         color: this.color,
         workspace_id: workspace_id,
+        rank: this.newRank,
       };
       axios
         .get("app/add", { params }, { withCredentials: true })
@@ -385,6 +496,7 @@ export default {
       const colorList = ["#29bf12", "#abff4f", "#08bdbd", "#ff9914"];
       const colorId = Math.floor(Math.random() * 4);
       this.color = colorList[colorId];
+      this.newRank = 1;
       this.newNote = true;
     },
     CopyWorkspaceUrl() {
@@ -421,6 +533,15 @@ export default {
       } catch (e) {
         // silent
       }
+    },
+    resetFilters() {
+      // Reset to defaults: mode active, no rank/status filters
+      this.currentMode = 'active';
+      this.currentRankFilter = '';
+      this.currentStatusFilter = '';
+      // Emit legacy event for view mode and combined filters for consumers
+      this.$emit('viewMode', 'active');
+      this.emitFilters();
     },
     resetWorkspace() {
       const currentUrl = window.location.href;
@@ -585,6 +706,21 @@ export default {
 .color-swatch.selected {
   box-shadow: 0 0 0 2px rgba(255,255,255,0.9) inset, 0 0 0 3px rgba(0,0,0,0.08), 0 6px 14px rgba(0,0,0,0.18);
 }
+/* Minimal star rating style: remove any icon shadows and focus glows */
+.minimal-stars .q-icon,
+.minimal-stars .q-rating__icon,
+.minimal-stars .q-rating__icon .q-icon,
+.minimal-stars .q-rating__icon--selected .q-icon {
+  text-shadow: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+.minimal-stars .q-rating__icon:before,
+.minimal-stars .q-focus-helper {
+  box-shadow: none !important;
+  outline: none !important;
+}
+.minimal-stars .q-rating__icon { transition: none; }
 </style>
 
 
@@ -597,5 +733,23 @@ export default {
 }
 .modal-card.shake {
   animation: shake 300ms ease-in-out;
+}
+</style>
+
+
+<style scoped>
+/* Responsive layout for color and rank pickers */
+.picker-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  row-gap: 12px;
+}
+@media (min-width: 768px) {
+  .picker-grid {
+    grid-template-columns: 1fr auto;
+    column-gap: 16px;
+    align-items: end;
+  }
+  .rank-block { justify-self: start; }
 }
 </style>

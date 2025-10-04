@@ -22,7 +22,36 @@ class WorkspaceUtils:
     """Namespace class for workspace utility methods."""
 
     @staticmethod
-    def add_note(title: str, note: str, workspace_id: str, color: str = '#fff') -> bool:
+    def _parse_status(value: Optional[str]) -> int:
+        try:
+            if value is None or value == '':
+                return Postit.status.default.arg if hasattr(Postit.status, 'default') else 0
+            v = str(value).strip().lower()
+            # allow numeric strings
+            if v.isdigit():
+                iv = int(v)
+                return iv if iv in (0, 1, 2) else 0
+            mapping = {
+                'new': 0,
+                'progress': 1,
+                'in_progress': 1,
+                'in-progress': 1,
+                'done': 2,
+            }
+            return mapping.get(v, 0)
+        except Exception:
+            return 0
+
+    @staticmethod
+    def _parse_rank(value: Optional[str]) -> int:
+        try:
+            iv = int(value) if value is not None and value != '' else 0
+        except Exception:
+            iv = 0
+        return max(0, min(5, iv))
+
+    @staticmethod
+    def add_note(title: str, note: str, workspace_id: str, color: str = '#fff', status: Optional[str] = None, rank: Optional[str] = None) -> bool:
         """Create a new note under a workspace.
 
         Returns True if created; False otherwise. Logic unchanged.
@@ -43,6 +72,8 @@ class WorkspaceUtils:
                     workspace_id=workspace.id,
                     extra_info=extra_info,
                     active=True,
+                    status=WorkspaceUtils._parse_status(status),
+                    rank=WorkspaceUtils._parse_rank(rank),
                 )
                 db.session.add(new_note)
                 db.session.commit()
@@ -53,8 +84,8 @@ class WorkspaceUtils:
         return is_success
 
     @staticmethod
-    def edit_note(title: str, note: str, note_id: str, workspace_id: str, color: Optional[str] = None) -> Dict[str, Any]:
-        """Edit an existing note. Optionally updates color.
+    def edit_note(title: str, note: str, note_id: str, workspace_id: str, color: Optional[str] = None, status: Optional[str] = None, rank: Optional[str] = None) -> Dict[str, Any]:
+        """Edit an existing note. Optionally updates color, status and rank.
 
         Returns a dict with key 'is_success'. Logic unchanged.
         """
@@ -65,8 +96,11 @@ class WorkspaceUtils:
             response['is_success'] = False
             return response
 
-        postit.title = title
-        postit.note = note
+        # Only update title/note when explicitly provided to avoid clearing them on partial updates
+        if title is not None:
+            postit.title = title
+        if note is not None:
+            postit.note = note
         postit.active = True
 
         # Update color if provided
@@ -82,6 +116,13 @@ class WorkspaceUtils:
             except Exception:
                 # swallow any issues updating color to keep original flow
                 pass
+
+        # Update status and rank if provided
+        if status is not None and status != '':
+            postit.status = WorkspaceUtils._parse_status(status)
+        if rank is not None and rank != '':
+            postit.rank = WorkspaceUtils._parse_rank(rank)
+
         try:
             db.session.commit()
             response['is_success'] = True
@@ -119,10 +160,13 @@ class WorkspaceUtils:
         return response
 
     @staticmethod
-    def get_workspace_notes(workspace_uuid: str, mode: str = 'default') -> List[Dict[str, Any]]:
-        """Return notes for a workspace, filtered by mode; sorted by id desc by default.
+    def get_workspace_notes(workspace_uuid: str, mode: str = 'default', rank: Optional[str] = None, status: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Return notes for a workspace, filtered by mode, and optionally by rank/status; sorted by id desc.
 
         Supported modes: 'active', 'disabled'/'deactive', 'all', '' (default -> all).
+        Optional filters:
+        - rank: 1–5 (ints or numeric strings). 0 or empty means no filter.
+        - status: 0=new, 1=in progress, 2=done (ints or strings like 'new', 'progress', 'done').
         """
         results: List[Dict[str, Any]] = []
         mode = bleach.clean(mode)
@@ -137,9 +181,24 @@ class WorkspaceUtils:
                 postit_query = postit_query.filter(Postit.active == True)
             elif mode in ('disabled', 'deactive'):
                 postit_query = postit_query.filter(Postit.active == False)
-            elif mode == 'all' or mode == '' or mode == 'default':
+            elif mode in ('all', '', 'default'):
                 pass  # no additional filter
             # any other mode: default to all
+
+            # Apply optional rank/status filters if provided
+            try:
+                if rank is not None and str(rank) != '':
+                    parsed_rank = WorkspaceUtils._parse_rank(rank)
+                    if parsed_rank > 0:
+                        postit_query = postit_query.filter(Postit.rank == parsed_rank)
+            except Exception:
+                pass
+            try:
+                if status is not None and str(status) != '':
+                    parsed_status = WorkspaceUtils._parse_status(status)
+                    postit_query = postit_query.filter(Postit.status == parsed_status)
+            except Exception:
+                pass
 
             for rec in postit_query.all():
                 results.append({
@@ -151,6 +210,8 @@ class WorkspaceUtils:
                     'notes_by_line': rec.note.splitlines(),
                     'uuid': rec.uuid,
                     'extra_info': rec.extra_info,
+                    'status': rec.status,
+                    'rank': rec.rank,
                 })
         # Keep default sort: newest first
         results = sorted(results, key=lambda x: x['id'], reverse=True)

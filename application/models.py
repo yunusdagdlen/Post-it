@@ -1,7 +1,9 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 # Copyright (C) 2022 Post-it
+from sqlalchemy import CheckConstraint
 from sqlalchemy.dialects.sqlite import JSON
+from application.enums import PostStatus
 
 from application import db
 
@@ -16,6 +18,13 @@ class Postit(db.Model):
     uuid = db.Column(db.String, nullable=False)
     extra_info = db.Column(JSON)
     is_deleted = db.Column(db.Boolean, default=False)
+    # New fields
+    status = db.Column(db.Integer, nullable=False, default=PostStatus.NEW.value, server_default='0', index=True)
+    rank = db.Column(db.Integer, nullable=False, default=0, server_default='0')
+
+    __table_args__ = (
+        CheckConstraint('rank >= 0 AND rank <= 5', name='ck_postit_rank_range'),
+    )
 
 
 class WorkSpaces(db.Model):

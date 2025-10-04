@@ -35,12 +35,20 @@ def index():
 
 @mod_pages.route('/app/list_postits', methods=['GET'])
 def list_postits_app():
-    """Return JSON list of notes for current workspace (and the workspace id)."""
-    mode = request.args.get('mode', '')
+    """Return JSON list of notes for current workspace (and the workspace id).
+
+    Be lenient with incoming query param names to support various frontend emitters.
+    Accepts keys like: mode | filter[mode] | filter.mode | currentMode; similarly for rank/status.
+    """
+    # Resolve possible param name variations
+    mode = request.args.get('mode[mode]') or ''
+    rank = request.args.get('mode[rank]')
+    status = request.args.get('mode[status]')
+
     workspace_uuid = WorkspaceUtils.get_workspace_id()
     response = {
         'workspace_id': workspace_uuid,
-        'postits': WorkspaceUtils.get_workspace_notes(workspace_uuid=workspace_uuid, mode=mode),
+        'postits': WorkspaceUtils.get_workspace_notes(workspace_uuid=workspace_uuid, mode=mode, rank=rank, status=status),
     }
     return jsonify(response)
 
@@ -51,6 +59,8 @@ def add_note_app():
     title = request.args.get('title', '')
     note = request.args.get('note', '')
     color = request.args.get('color', '')
+    status = request.args.get('status')  # can be int or string name
+    rank = request.args.get('rank')
 
     workspace_id = WorkspaceUtils.get_workspace_id()
 
@@ -61,7 +71,7 @@ def add_note_app():
         workspace_id = bleach.clean(workspace_id)
         color = bleach.clean(color)
 
-        is_success = WorkspaceUtils.add_note(title, note, workspace_id, color)
+        is_success = WorkspaceUtils.add_note(title, note, workspace_id, color, status=status, rank=rank)
         response = {'is_success': is_success, 'workspace_id': workspace_id}
         return jsonify(response)
 
@@ -72,17 +82,22 @@ def add_note_app():
 @mod_pages.route('/app/edit-note/', methods=['GET'])
 def edit_note_app():
     """AJAX edit note endpoint (JSON)."""
-    title = request.args.get('title', '')
-    note = request.args.get('note', '')
+    # Use None as default to detect missing fields; avoid overwriting when not provided
+    title = request.args.get('title')
+    note = request.args.get('note')
     color = request.args.get('color', None)
+    status = request.args.get('status')
+    rank = request.args.get('rank')
     note_id = request.args.get('note_id')
     workspace_id = WorkspaceUtils.get_workspace_id(request.args.get('workspace_id'))
-    if title or note or color is not None:
-        title = bleach.clean(title)
-        note = bleach.clean(note)
+    if (title is not None) or (note is not None) or (color is not None) or (status is not None) or (rank is not None):
+        if title is not None:
+            title = bleach.clean(title)
+        if note is not None:
+            note = bleach.clean(note)
         if color is not None:
             color = bleach.clean(color)
-        response = WorkspaceUtils.edit_note(title, note, note_id, workspace_id, color=color)
+        response = WorkspaceUtils.edit_note(title, note, note_id, workspace_id, color=color, status=status, rank=rank)
 
         if response['is_success']:
             return jsonify(response)
