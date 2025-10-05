@@ -16,6 +16,7 @@ from flask import (
 
 from application.controller import mod_pages
 from application.utils.workspace_utils import WorkspaceUtils
+from application.utils.translation_utils import TranslationUtils
 
 
 @mod_pages.route('/')
@@ -153,3 +154,29 @@ def clear_workspace():
     """Clear workspace id from session."""
     session.pop('workspace_id', None)
     return jsonify({'is_success': True})
+
+
+@mod_pages.route('/app/translate', methods=['POST'])
+def translate_text():
+    """Translate text using googletrans via TranslationUtils.
+
+    Expects JSON: {"text": str, "source": str (optional, default 'auto'), "target": str}
+    Returns: {"translation": str, "alternatives": list}
+    """
+    data = request.get_json(silent=True) or {}
+    text = (data.get('text') or '').strip()
+    source = (data.get('source') or 'auto').strip() or 'auto'
+    target = (data.get('target') or '').strip()
+
+    if not text or not target:
+        return make_response(jsonify({
+            'error': 'Missing required fields',
+            'details': 'Provide text and target language code.'
+        }), 400)
+
+    try:
+        result = TranslationUtils.translate(text=text, source=source, target=target)
+        return jsonify(result)
+    except Exception as e:
+        # googletrans can fail intermittently due to network/ban issues
+        return make_response(jsonify({'error': 'Translation failed', 'details': str(e)}), 502)

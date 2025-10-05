@@ -52,19 +52,55 @@
         <q-card-section v-show="this.showNote" class="q-pt-none text-black card-content">
           <template v-for="(note, idx) in this.notes_by_line" :key="'line-'+idx">
             <div class="note-row row items-center no-wrap justify-between">
-              <span class="note-line text-black">{{ note }}</span>
-              <q-btn
-                flat
-                dense
-                round
-                icon="content_copy"
-                color="black"
-                size="sm"
-                @click.stop="copyLine(note)"
-                :aria-label="'Copy line ' + (idx + 1)"
-              >
-                <q-tooltip anchor="top middle" self="bottom middle" class="bg-grey-9 text-white">Copy</q-tooltip>
-              </q-btn>
+              <div class="line-left ellipsis">
+                <span class="note-line text-black">
+                  {{ lineStates[idx]?.showingOriginal ? lineStates[idx].original : (lineStates[idx]?.translated || note) }}
+                </span>
+                <q-spinner v-if="lineStates[idx]?.loading" size="14px" color="black" class="q-ml-xs" />
+              </div>
+              <div class="line-actions row items-center no-wrap">
+                <q-btn
+                  v-if="!lineStates[idx]?.translated || lineStates[idx]?.showingOriginal"
+                  flat
+                  dense
+                  round
+                  size="sm"
+                  icon="translate"
+                  color="black"
+                  :disable="lineStates[idx]?.loading"
+                  @click.stop="translateLine(idx)"
+                  :aria-label="'Translate line ' + (idx + 1)"
+                >
+                  <q-tooltip anchor="top middle" self="bottom middle" class="bg-grey-9 text-white">Translate</q-tooltip>
+                </q-btn>
+                <q-btn
+                  v-else
+                  flat
+                  dense
+                  round
+                  size="sm"
+                  icon="visibility"
+                  color="black"
+                  :disable="lineStates[idx]?.loading"
+                  @click.stop="toggleOriginal(idx)"
+                  :aria-label="'View original for line ' + (idx + 1)"
+                >
+                  <q-tooltip anchor="top middle" self="bottom middle" class="bg-grey-9 text-white">View original</q-tooltip>
+                </q-btn>
+                <q-btn
+                  flat
+                  dense
+                  round
+                  icon="content_copy"
+                  color="black"
+                  size="sm"
+                  class="q-ml-xs"
+                  @click.stop="copyLine(lineStates[idx]?.showingOriginal ? lineStates[idx].original : (lineStates[idx]?.translated || note))"
+                  :aria-label="'Copy line ' + (idx + 1)"
+                >
+                  <q-tooltip anchor="top middle" self="bottom middle" class="bg-grey-9 text-white">Copy</q-tooltip>
+                </q-btn>
+              </div>
             </div>
             <hr />
           </template>
@@ -159,6 +195,7 @@ export default {
       presetColors: ["#29bf12", "#abff4f", "#08bdbd", "#ff9914", "#4dabf7", "#845ef7", "#e64980", "#ffa94d"],
       active: this.postit.active,
       notes_by_line: this.postit.notes_by_line,
+      lineStates: (this.postit.notes_by_line || []).map(t => ({ original: t, translated: null, showingOriginal: false, loading: false })),
       showNote: false,
       menuButton: false,
     };
@@ -181,6 +218,13 @@ export default {
         const r = this.postit ? this.postit.rank : undefined;
         this.editRank = (r === null || r === undefined || r === '') ? 1 : r;
       }
+    },
+    'postit.notes_by_line': {
+      handler(newVal) {
+        this.notes_by_line = newVal || [];
+        this.lineStates = (this.notes_by_line || []).map(t => ({ original: t, translated: null, showingOriginal: false, loading: false }));
+      },
+      immediate: false
     }
   },
   computed: {
@@ -211,6 +255,35 @@ export default {
     }
   },
   methods: {
+      async translateLine(idx) {
+        try {
+          const state = this.lineStates[idx];
+          if (!state || state.loading) return;
+          // If we already have a translation but user is on original view, just toggle to translation
+          if (state.translated && state.showingOriginal) {
+            state.showingOriginal = false;
+            return;
+          }
+          state.loading = true;
+          const payload = { text: state.original, source: 'auto', target: 'tr' };
+          const res = await axios.post('/app/translate', payload, { withCredentials: true });
+          if (res && res.data && (res.data.translation || res.data.translatedText)) {
+            state.translated = res.data.translation || res.data.translatedText;
+            state.showingOriginal = false; // switch to translation view
+          }
+        } catch (e) {
+          // silent fail; optionally show a toast later
+          console.error(e);
+        } finally {
+          const st = this.lineStates[idx];
+          if (st) st.loading = false;
+        }
+      },
+      toggleOriginal(idx) {
+        const st = this.lineStates[idx];
+        if (!st) return;
+        st.showingOriginal = true;
+      },
     onCardClick() {
       const wasOpen = this.showNote;
       this.showNote = !this.showNote;
@@ -540,3 +613,14 @@ export default {
 </style>
 
 
+
+<style scoped>
+/* Line row and inline actions for translate button */
+.note-row { gap: 6px; padding: 2px 0; }
+.line-left { flex: 1; display: inline-flex; align-items: center; min-width: 0; }
+.note-line { white-space: pre-wrap; word-break: break-word; }
+.line-actions { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 2px; }
+/* Make action buttons appear like small letters next to the text */
+.line-actions .q-btn { font-size: 12px; width: 22px; height: 22px; }
+.line-actions .q-btn .q-icon { font-size: 16px; }
+</style>
