@@ -15,10 +15,12 @@ class IPWhois:
 
     def get_iphois_info(self, ip_address):
         ipwhois = {}
-        try:
-            response = requests.get(self.ipwhois_path.format(ip_address, self.config['FINDAPI_TOKEN']), timeout=5)
-            ipwhois = json.loads(response.text)
-        except requests.exceptions.Timeout:
-            pass
+        if ip_address not in ['127.0.0.1', 'localhost', '::1']:
+            try:
+                response = requests.get(self.ipwhois_path.format(ip_address, self.config['FINDAPI_TOKEN']),
+                                        timeout=5)
+                ipwhois = json.loads(response.text)
+            except requests.exceptions.Timeout:
+                pass
 
         return ipwhois

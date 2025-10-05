@@ -35,11 +35,24 @@
             class="col-3"
             style="display: flex; flex-direction: column; align-items: flex-end; justify-content: flex-start; gap: 6px;"
           >
-            <CardMenu
-              @edit="this.editNoteDialog = true"
-              @delete="deleteNote"
-              @disable="disableNote"
-            />
+            <div style="display: flex; flex-direction: row; align-items: center; justify-content: flex-end; gap: 6px; width: 100%;">
+              <q-btn
+                id="play"
+                flat
+                dense
+                round
+                size="sm"
+                icon="volume_up"
+                color="black"
+                @click.stop="speakTitleAndNote"
+                aria-label="Speak"
+              />
+              <CardMenu
+                @edit="this.editNoteDialog = true"
+                @delete="deleteNote"
+                @disable="disableNote"
+              />
+            </div>
             <DoneCheck
               :show="((currentStatus === 2) || (currentStatus === undefined && postit && postit.status === 2))"
               color="black"
@@ -171,6 +184,7 @@
   </q-dialog>
 </template>
 <script>
+/* global puter */
 import axios from "axios";
 import { copyToClipboard } from "quasar";
 // axios.defaults.baseURL = "https://notedflow.com";
@@ -198,6 +212,7 @@ export default {
       lineStates: (this.postit.notes_by_line || []).map(t => ({ original: t, translated: null, showingOriginal: false, loading: false })),
       showNote: false,
       menuButton: false,
+      puterSignedIn: false, 
     };
   },
   name: "PostitCard",
@@ -283,6 +298,58 @@ export default {
         const st = this.lineStates[idx];
         if (!st) return;
         st.showingOriginal = true;
+      },
+      async playPuterSpeak(text) {
+        try {
+          if (!text || typeof text !== 'string') return;
+          const win = typeof window !== 'undefined' ? window : undefined;
+          const p = (win && typeof win.puter !== 'undefined') ? win.puter : (typeof puter !== 'undefined' ? puter : null);
+
+          // IMPORTANT: Do NOT trigger Puter sign-in from a simple click.
+          // Some environments open a blocking overlay/modal that can swallow further clicks.
+          // We'll only try TTS if the SDK is present and functional; otherwise we fall back.
+
+          // Try Puter TTS if available (without forcing sign-in)
+          if (p && p.ai?.txt2speech) {
+            try {
+              // Race txt2speech with a timeout so we never hang the UI if SDK stalls
+              const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('Puter TTS timeout')), 3000));
+              const audio = await Promise.race([p.ai.txt2speech(text,
+                  {
+                    voice: "Amy",
+                    engine: "standard",
+                    language: "en-GB"
+                  }),
+                  timeout]);
+              if (audio?.play) {
+                audio.play();
+                return;
+              }
+            } catch (ttsErr) {
+              console.error('Puter TTS failed:', ttsErr);
+            }
+          }
+
+          // Fallback: Web Speech API
+          if (win && 'speechSynthesis' in win && typeof win.SpeechSynthesisUtterance !== 'undefined') {
+            const utter = new win.SpeechSynthesisUtterance(text);
+            utter.lang = 'en-US';
+            win.speechSynthesis.cancel(); // stop any existing speech
+            win.speechSynthesis.speak(utter);
+          } else {
+            console.warn('No speech synthesis available.');
+          }
+        } catch(e) {
+          console.error(e);
+        }
+      },
+      speakTitleAndNote() {
+        const title = typeof this.title === 'string' ? this.title.trim() : '';
+        const note = typeof this.note === 'string' ? this.note.trim() : '';
+        const combined = [title, note].filter(Boolean).join('. ');
+        if (combined) {
+          this.playPuterSpeak(combined);
+        }
       },
     onCardClick() {
       const wasOpen = this.showNote;
