@@ -249,9 +249,20 @@ class WorkspaceUtils:
 
     @staticmethod
     def get_workspace_id(workspace_id: Optional[str] = None) -> str:
-        """Return workspace_id from session; create and persist if missing."""
-        wid = workspace_id or session.get('workspace_id')
+        """Return the active workspace_id using cookies preference.
+
+        Priority:
+        1) Explicit parameter (used to switch workspaces via request args)
+        2) Request args: workspace_id
+        3) Cookie: workspace_id
+        If none is found, a new workspace uuid is created and returned. The caller
+        (controller) is responsible for setting the cookie on the response.
+        """
+        wid = (
+            (workspace_id if workspace_id else None)
+            or request.args.get('workspace_id')
+            or request.cookies.get('workspace_id')
+        )
         if not wid:
             wid = WorkspaceUtils.create_workspace()
-            session['workspace_id'] = wid
         return wid

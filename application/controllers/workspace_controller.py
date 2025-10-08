@@ -27,11 +27,13 @@ def index_legacy():
 
 @mod_pages.route('/app')  # production build initial point
 def index():
-    """Render SPA entry and optionally persist incoming workspace_id to session."""
+    """Render SPA entry and optionally persist incoming workspace_id to cookie."""
     workspace_id = request.args.get('workspace_id')
+    resp = make_response(render_template('app/index.html'))
     if workspace_id:
-        session['workspace_id'] = workspace_id
-    return render_template('app/index.html')
+        # Set/overwrite active workspace via cookie so SPA requests carry it
+        resp.set_cookie('workspace_id', workspace_id, path='/', httponly=True, samesite='Lax')
+    return resp
 
 
 @mod_pages.route('/app/list_postits', methods=['GET'])
@@ -70,11 +72,15 @@ def list_postits_app():
     )
 
     workspace_uuid = WorkspaceUtils.get_workspace_id()
-    response = {
+    response_payload = {
         'workspace_id': workspace_uuid,
         'postits': WorkspaceUtils.get_workspace_notes(workspace_uuid=workspace_uuid, mode=mode, rank=rank, status=status, search=search),
     }
-    return jsonify(response)
+    resp = jsonify(response_payload)
+    # Ensure cookie reflects the active workspace (newly created or switched)
+    if request.cookies.get('workspace_id') != workspace_uuid:
+        resp.set_cookie('workspace_id', workspace_uuid, path='/', httponly=True, samesite='Lax')
+    return resp
 
 
 @mod_pages.route('/app/add', methods=['GET'])
@@ -97,7 +103,10 @@ def add_note_app():
 
         is_success = WorkspaceUtils.add_note(title, note, workspace_id, color, status=status, rank=rank)
         response = {'is_success': is_success, 'workspace_id': workspace_id}
-        return jsonify(response)
+        resp = jsonify(response)
+        if request.cookies.get('workspace_id') != workspace_id:
+            resp.set_cookie('workspace_id', workspace_id, path='/', httponly=True, samesite='Lax')
+        return resp
 
     # If no content provided, return 400
     return abort(make_response("Bad Request: title or note required", 400))
@@ -124,7 +133,10 @@ def edit_note_app():
         response = WorkspaceUtils.edit_note(title, note, note_id, workspace_id, color=color, status=status, rank=rank)
 
         if response['is_success']:
-            return jsonify(response)
+            resp = jsonify(response)
+            if request.cookies.get('workspace_id') != workspace_id:
+                resp.set_cookie('workspace_id', workspace_id, path='/', httponly=True, samesite='Lax')
+            return resp
 
 
 @mod_pages.route('/app/delete-note/', methods=['GET'])
@@ -135,7 +147,10 @@ def delete_note_app():
     if note_id:
         response = WorkspaceUtils.delete_note(id=note_id, workspace_uuid=workspace_id)
         if response['is_success']:
-            return jsonify(response)
+            resp = jsonify(response)
+            if request.cookies.get('workspace_id') != workspace_id:
+                resp.set_cookie('workspace_id', workspace_id, path='/', httponly=True, samesite='Lax')
+            return resp
 
 
 @mod_pages.route('/app/disable-note/', methods=['GET'])
@@ -146,14 +161,19 @@ def disable_note_app():
     if note_id:
         response = WorkspaceUtils.disable_note(id=note_id, workspace_uuid=workspace_id)
         if response['is_success']:
-            return jsonify(response)
+            resp = jsonify(response)
+            if request.cookies.get('workspace_id') != workspace_id:
+                resp.set_cookie('workspace_id', workspace_id, path='/', httponly=True, samesite='Lax')
+            return resp
 
 
 @mod_pages.route('/app/clear-workspace', methods=['GET', 'POST'])
 def clear_workspace():
-    """Clear workspace id from session."""
-    session.pop('workspace_id', None)
-    return jsonify({'is_success': True})
+    """Clear workspace id cookie."""
+    resp = jsonify({'is_success': True})
+    # Remove cookie; client can request a new workspace next time
+    resp.delete_cookie('workspace_id', path='/')
+    return resp
 
 
 @mod_pages.route('/app/translate', methods=['POST'])
