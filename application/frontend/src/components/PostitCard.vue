@@ -42,10 +42,10 @@
                 dense
                 round
                 size="sm"
-                icon="volume_up"
+                :icon="isPlaying ? 'stop' : 'volume_up'"
                 color="black"
-                @click.stop="speakTitleAndNote"
-                aria-label="Speak"
+                @click.stop="isPlaying ? stopSpeaking() : speakTitleAndNote()"
+                :aria-label="isPlaying ? 'Stop' : 'Speak'"
               />
               <CardMenu
                 @edit="this.editNoteDialog = true"
@@ -104,14 +104,14 @@
                   flat
                   dense
                   round
-                  icon="content_copy"
+                  :icon="lineStates[idx]?.isPlayingLine ? 'stop' : 'volume_up'"
                   color="black"
                   size="sm"
                   class="q-ml-xs"
-                  @click.stop="copyLine(lineStates[idx]?.showingOriginal ? lineStates[idx].original : (lineStates[idx]?.translated || note))"
-                  :aria-label="'Copy line ' + (idx + 1)"
+                  @click.stop="lineStates[idx]?.isPlayingLine ? stopLineSpeaking(idx) : playLineSpeaking(idx, lineStates[idx]?.showingOriginal ? lineStates[idx].original : (lineStates[idx]?.translated || note))"
+                  :aria-label="lineStates[idx]?.isPlayingLine ? 'Stop line ' + (idx + 1) : 'Speak line ' + (idx + 1)"
                 >
-                  <q-tooltip anchor="top middle" self="bottom middle" class="bg-grey-9 text-white">Copy</q-tooltip>
+                  <q-tooltip anchor="top middle" self="bottom middle" class="bg-grey-9 text-white">{{ lineStates[idx]?.isPlayingLine ? 'Stop' : 'Speak' }}</q-tooltip>
                 </q-btn>
               </div>
             </div>
@@ -195,6 +195,20 @@ import ColorSwatches from './ColorSwatches.vue';
 import CardMenu from './CardMenu.vue';
 import DoneCheck from './DoneCheck.vue';
 
+// Simple event emitter for cross-card speech coordination
+const speechEventBus = {
+  listeners: [],
+  on(callback) {
+    this.listeners.push(callback);
+  },
+  off(callback) {
+    this.listeners = this.listeners.filter(cb => cb !== callback);
+  },
+  emit() {
+    this.listeners.forEach(cb => cb());
+  }
+};
+
 export default {
   components: { MinimalStars, StatusPicker, ColorSwatches, CardMenu, DoneCheck },
   data() {
@@ -209,10 +223,12 @@ export default {
       presetColors: ["#29bf12", "#abff4f", "#08bdbd", "#ff9914", "#4dabf7", "#845ef7", "#e64980", "#ffa94d"],
       active: this.postit.active,
       notes_by_line: this.postit.notes_by_line,
-      lineStates: (this.postit.notes_by_line || []).map(t => ({ original: t, translated: null, showingOriginal: false, loading: false })),
+      lineStates: (this.postit.notes_by_line || []).map(t => ({ original: t, translated: null, showingOriginal: false, loading: false, isPlayingLine: false })),
       showNote: false,
       menuButton: false,
-      puterSignedIn: false, 
+      puterSignedIn: false,
+      isPlaying: false,
+      currentAudio: null,
     };
   },
   name: "PostitCard",
@@ -237,7 +253,7 @@ export default {
     'postit.notes_by_line': {
       handler(newVal) {
         this.notes_by_line = newVal || [];
-        this.lineStates = (this.notes_by_line || []).map(t => ({ original: t, translated: null, showingOriginal: false, loading: false }));
+        this.lineStates = (this.notes_by_line || []).map(t => ({ original: t, translated: null, showingOriginal: false, loading: false, isPlayingLine: false }));
       },
       immediate: false
     }
@@ -302,6 +318,13 @@ export default {
       async playPuterSpeak(text) {
         try {
           if (!text || typeof text !== 'string') return;
+          
+          // Notify all cards to stop their audio (including this one)
+          speechEventBus.emit();
+          
+          // Stop any currently playing audio first
+          this.stopSpeaking();
+          
           const win = typeof window !== 'undefined' ? window : undefined;
           const p = (win && typeof win.puter !== 'undefined') ? win.puter : (typeof puter !== 'undefined' ? puter : null);
 
@@ -322,6 +345,22 @@ export default {
                   }),
                   timeout]);
               if (audio?.play) {
+                this.currentAudio = audio;
+                this.isPlaying = true;
+                
+                // Handle audio end event
+                if (audio.addEventListener) {
+                  audio.addEventListener('ended', () => {
+                    this.isPlaying = false;
+                    this.currentAudio = null;
+                  });
+                } else if (audio.onended !== undefined) {
+                  audio.onended = () => {
+                    this.isPlaying = false;
+                    this.currentAudio = null;
+                  };
+                }
+                
                 audio.play();
                 return;
               }
@@ -334,6 +373,20 @@ export default {
           if (win && 'speechSynthesis' in win && typeof win.SpeechSynthesisUtterance !== 'undefined') {
             const utter = new win.SpeechSynthesisUtterance(text);
             utter.lang = 'en-US';
+            
+            // Handle speech end event
+            utter.onend = () => {
+              this.isPlaying = false;
+              this.currentAudio = null;
+            };
+            
+            utter.onerror = () => {
+              this.isPlaying = false;
+              this.currentAudio = null;
+            };
+            
+            this.currentAudio = utter;
+            this.isPlaying = true;
             win.speechSynthesis.cancel(); // stop any existing speech
             win.speechSynthesis.speak(utter);
           } else {
@@ -341,6 +394,36 @@ export default {
           }
         } catch(e) {
           console.error(e);
+          this.isPlaying = false;
+          this.currentAudio = null;
+        }
+      },
+      stopSpeaking() {
+        try {
+          // Stop Web Speech API
+          const win = typeof window !== 'undefined' ? window : undefined;
+          if (win && 'speechSynthesis' in win) {
+            win.speechSynthesis.cancel();
+          }
+          
+          // Stop Puter audio if exists
+          if (this.currentAudio) {
+            if (this.currentAudio.pause) {
+              this.currentAudio.pause();
+            }
+            if (this.currentAudio.stop) {
+              this.currentAudio.stop();
+            }
+            this.currentAudio = null;
+          }
+          
+          this.isPlaying = false;
+          
+          // Reset all line playing states
+          this.stopAllLines();
+        } catch (e) {
+          console.error('Error stopping speech:', e);
+          this.isPlaying = false;
         }
       },
       speakTitleAndNote() {
@@ -350,6 +433,138 @@ export default {
         if (combined) {
           this.playPuterSpeak(combined);
         }
+      },
+      async playLineSpeaking(idx, text) {
+        try {
+          if (!text || typeof text !== 'string') return;
+          
+          // Notify all cards to stop their audio (including this one)
+          speechEventBus.emit();
+          
+          // Stop any currently playing audio (both main card and all lines)
+          this.stopSpeaking();
+          this.stopAllLines();
+          
+          // Set this line as playing
+          if (this.lineStates[idx]) {
+            this.lineStates[idx].isPlayingLine = true;
+          }
+          
+          const win = typeof window !== 'undefined' ? window : undefined;
+          const p = (win && typeof win.puter !== 'undefined') ? win.puter : (typeof puter !== 'undefined' ? puter : null);
+
+          // Try Puter TTS if available (without forcing sign-in)
+          if (p && p.ai?.txt2speech) {
+            try {
+              const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('Puter TTS timeout')), 3000));
+              const audio = await Promise.race([p.ai.txt2speech(text,
+                  {
+                    voice: "Amy",
+                    engine: "standard",
+                    language: "en-GB"
+                  }),
+                  timeout]);
+              if (audio?.play) {
+                this.currentAudio = audio;
+                
+                // Handle audio end event
+                if (audio.addEventListener) {
+                  audio.addEventListener('ended', () => {
+                    if (this.lineStates[idx]) {
+                      this.lineStates[idx].isPlayingLine = false;
+                    }
+                    this.currentAudio = null;
+                  });
+                } else if (audio.onended !== undefined) {
+                  audio.onended = () => {
+                    if (this.lineStates[idx]) {
+                      this.lineStates[idx].isPlayingLine = false;
+                    }
+                    this.currentAudio = null;
+                  };
+                }
+                
+                audio.play();
+                return;
+              }
+            } catch (ttsErr) {
+              console.error('Puter TTS failed:', ttsErr);
+            }
+          }
+
+          // Fallback: Web Speech API
+          if (win && 'speechSynthesis' in win && typeof win.SpeechSynthesisUtterance !== 'undefined') {
+            const utter = new win.SpeechSynthesisUtterance(text);
+            utter.lang = 'en-US';
+            
+            // Handle speech end event
+            utter.onend = () => {
+              if (this.lineStates[idx]) {
+                this.lineStates[idx].isPlayingLine = false;
+              }
+              this.currentAudio = null;
+            };
+            
+            utter.onerror = () => {
+              if (this.lineStates[idx]) {
+                this.lineStates[idx].isPlayingLine = false;
+              }
+              this.currentAudio = null;
+            };
+            
+            this.currentAudio = utter;
+            win.speechSynthesis.cancel();
+            win.speechSynthesis.speak(utter);
+          } else {
+            console.warn('No speech synthesis available.');
+            if (this.lineStates[idx]) {
+              this.lineStates[idx].isPlayingLine = false;
+            }
+          }
+        } catch(e) {
+          console.error(e);
+          if (this.lineStates[idx]) {
+            this.lineStates[idx].isPlayingLine = false;
+          }
+          this.currentAudio = null;
+        }
+      },
+      stopLineSpeaking(idx) {
+        try {
+          // Stop all audio playback
+          const win = typeof window !== 'undefined' ? window : undefined;
+          if (win && 'speechSynthesis' in win) {
+            win.speechSynthesis.cancel();
+          }
+          
+          if (this.currentAudio) {
+            if (this.currentAudio.pause) {
+              this.currentAudio.pause();
+            }
+            if (this.currentAudio.stop) {
+              this.currentAudio.stop();
+            }
+            this.currentAudio = null;
+          }
+          
+          // Reset this line's playing state
+          if (this.lineStates[idx]) {
+            this.lineStates[idx].isPlayingLine = false;
+          }
+        } catch (e) {
+          console.error('Error stopping line speech:', e);
+          if (this.lineStates[idx]) {
+            this.lineStates[idx].isPlayingLine = false;
+          }
+        }
+      },
+      stopAllLines() {
+        // Reset all line playing states
+        this.lineStates.forEach(state => {
+          if (state) {
+            state.isPlayingLine = false;
+          }
+        });
       },
     onCardClick() {
       const wasOpen = this.showNote;
@@ -364,30 +579,6 @@ export default {
         }
       }
     },
-    // editNote() {
-    //   const workspace_id = this.$route.query?.workspace_id;
-    //
-    //   // Create form data
-    //   const formData = new FormData();
-    //   formData.append("workspace_id", workspace_id);
-    //   formData.append("note_id", this.postit.uuid);
-    //   formData.append("title", this.title);
-    //   formData.append("note", this.note);
-    //
-    //
-    //   // Axios POST request
-    //   axios
-    //     .post(`edit-note`, formData, { withCredentials: true })
-    //     .then((response) => {
-    //       if (response.status === 200) {
-    //         this.editNoteDialog = false;
-    //         this.$emit("ok");
-    //       }
-    //     })
-    //     .catch((error) => {
-    //       console.log(error);
-    //     });
-    // },
     editSingleNote() {
       const workspace_id = this.$route.query?.workspace_id;
       const params = {
@@ -500,6 +691,19 @@ export default {
           console.log(error);
         });
     },
+  },
+  mounted() {
+    // Subscribe to cross-card speech stop events
+    this.stopSpeechHandler = () => {
+      this.stopSpeaking();
+    };
+    speechEventBus.on(this.stopSpeechHandler);
+  },
+  unmounted() {
+    // Clean up listener when component is destroyed
+    if (this.stopSpeechHandler) {
+      speechEventBus.off(this.stopSpeechHandler);
+    }
   },
 };
 </script>
