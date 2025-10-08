@@ -23,14 +23,19 @@
       </div>
     </div>
 
-    <div
+    <transition-group
       v-else
+      name="card-list"
+      tag="div"
       class="cards-list"
     >
-      <template v-for="postit in this.postitList" :key="postit">
-        <postit-card :postit="postit" @ok="fetchAllNotes" />
-      </template>
-    </div>
+      <postit-card
+        v-for="postit in this.postitList"
+        :key="postit.uuid"
+        :postit="postit"
+        @ok="fetchAllNotes"
+      />
+    </transition-group>
   </div>
 </template>
 
@@ -223,5 +228,28 @@ export default {
   font-size: 14px;
   color: #868e96;
   margin-top: 4px;
+}
+
+/* Card list transition animations */
+.card-list-enter-active {
+  transition: all 0.4s ease-out;
+}
+
+.card-list-leave-active {
+  transition: all 0.3s ease-in;
+}
+
+.card-list-enter-from {
+  opacity: 0;
+  transform: translateY(20px) scale(0.95);
+}
+
+.card-list-leave-to {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.98);
+}
+
+.card-list-move {
+  transition: transform 0.3s ease;
 }
 </style>

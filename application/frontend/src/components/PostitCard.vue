@@ -66,6 +66,28 @@
           <template v-for="(note, idx) in this.notes_by_line" :key="'line-'+idx">
             <div class="note-row row items-center no-wrap justify-between">
               <div class="line-left ellipsis">
+                <q-btn
+                  flat
+                  dense
+                  round
+                  icon="content_copy"
+                  color="black"
+                  size="sm"
+                  class="q-mr-xs"
+                  @mouseenter="handleLineHover(idx)"
+                  @mouseleave="handleLineLeave(idx)"
+                  @click.stop="copyLineText(idx, lineStates[idx]?.showingOriginal ? lineStates[idx].original : (lineStates[idx]?.translated || note))"
+                  :aria-label="'Copy line ' + (idx + 1)"
+                >
+                  <q-tooltip 
+                    v-model="lineStates[idx].showTooltip"
+                    anchor="top middle" 
+                    self="bottom middle" 
+                    class="bg-grey-9 text-white"
+                  >
+                    {{ lineStates[idx]?.showCopied ? 'Copied' : 'Copy' }}
+                  </q-tooltip>
+                </q-btn>
                 <span class="note-line text-black">
                   {{ lineStates[idx]?.showingOriginal ? lineStates[idx].original : (lineStates[idx]?.translated || note) }}
                 </span>
@@ -223,7 +245,7 @@ export default {
       presetColors: ["#29bf12", "#abff4f", "#08bdbd", "#ff9914", "#4dabf7", "#845ef7", "#e64980", "#ffa94d"],
       active: this.postit.active,
       notes_by_line: this.postit.notes_by_line,
-      lineStates: (this.postit.notes_by_line || []).map(t => ({ original: t, translated: null, showingOriginal: false, loading: false, isPlayingLine: false })),
+      lineStates: (this.postit.notes_by_line || []).map(t => ({ original: t, translated: null, showingOriginal: false, loading: false, isPlayingLine: false, hoverTimeout: null, showTooltip: false, showCopied: false })),
       showNote: false,
       menuButton: false,
       puterSignedIn: false,
@@ -253,7 +275,7 @@ export default {
     'postit.notes_by_line': {
       handler(newVal) {
         this.notes_by_line = newVal || [];
-        this.lineStates = (this.notes_by_line || []).map(t => ({ original: t, translated: null, showingOriginal: false, loading: false, isPlayingLine: false }));
+        this.lineStates = (this.notes_by_line || []).map(t => ({ original: t, translated: null, showingOriginal: false, loading: false, isPlayingLine: false, hoverTimeout: null, showTooltip: false, showCopied: false }));
       },
       immediate: false
     }
@@ -691,6 +713,71 @@ export default {
           console.log(error);
         });
     },
+
+    handleLineHover(idx) {
+      const state = this.lineStates[idx];
+      if (!state) return;
+      
+      // Clear any existing timeout
+      if (state.hoverTimeout) {
+        clearTimeout(state.hoverTimeout);
+      }
+      
+      // Set timeout to show tooltip after 500ms
+      state.hoverTimeout = setTimeout(() => {
+        state.showTooltip = true;
+      }, 500);
+    },
+
+    handleLineLeave(idx) {
+      const state = this.lineStates[idx];
+      if (!state) return;
+      
+      // Clear the hover timeout
+      if (state.hoverTimeout) {
+        clearTimeout(state.hoverTimeout);
+        state.hoverTimeout = null;
+      }
+      
+      // Hide tooltip unless we're showing "Copied"
+      if (!state.showCopied) {
+        state.showTooltip = false;
+      }
+    },
+
+    copyLineText(idx, text) {
+      const state = this.lineStates[idx];
+      if (!state) return;
+      
+      try {
+        const textToCopy = (text === null || text === undefined) ? '' : String(text);
+        if (!textToCopy) return;
+        
+        // Clear hover timeout
+        if (state.hoverTimeout) {
+          clearTimeout(state.hoverTimeout);
+          state.hoverTimeout = null;
+        }
+        
+        // Copy to clipboard
+        copyToClipboard(textToCopy).then(() => {
+          // Show "Copied" tooltip
+          state.showCopied = true;
+          state.showTooltip = true;
+          
+          // Reset after 2 seconds
+          setTimeout(() => {
+            state.showCopied = false;
+            state.showTooltip = false;
+          }, 2000);
+        }).catch(() => {
+          // If copy fails, just hide tooltip
+          state.showTooltip = false;
+        });
+      } catch (e) {
+        state.showTooltip = false;
+      }
+    },
   },
   mounted() {
     // Subscribe to cross-card speech stop events
@@ -768,11 +855,24 @@ export default {
 <style scoped>
 /* Simple expand/collapse animation for card content */
 .card-expand-enter-active, .card-expand-leave-active {
-  transition: opacity 160ms ease, transform 160ms ease;
+  transition: opacity 250ms ease, transform 250ms ease, max-height 250ms ease;
+  overflow: hidden;
 }
-.card-expand-enter-from, .card-expand-leave-to {
+.card-expand-enter-active {
+  max-height: 2000px;
+}
+.card-expand-leave-active {
+  max-height: 2000px;
+}
+.card-expand-enter-from {
   opacity: 0;
   transform: translateY(-6px) scale(0.98);
+  max-height: 0;
+}
+.card-expand-leave-to {
+  opacity: 0;
+  transform: translateY(-6px) scale(0.98);
+  max-height: 0;
 }
 .card-expand-enter-to, .card-expand-leave-from {
   opacity: 1;
@@ -894,4 +994,7 @@ export default {
 /* Make action buttons appear like small letters next to the text */
 .line-actions .q-btn { font-size: 12px; width: 22px; height: 22px; }
 .line-actions .q-btn .q-icon { font-size: 16px; }
+/* Copy button on the left side */
+.line-left .q-btn { font-size: 12px; width: 22px; height: 22px; }
+.line-left .q-btn .q-icon { font-size: 16px; }
 </style>
