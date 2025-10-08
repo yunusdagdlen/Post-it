@@ -36,6 +36,20 @@
         @ok="fetchAllNotes"
       />
     </transition-group>
+    
+    <!-- Show more button -->
+    <div v-if="postitList.length > 0 && hasMore" class="show-more-container">
+      <q-btn
+        :loading="isLoadingMore"
+        :disable="isLoadingMore"
+        color="primary"
+        outline
+        label="Show more"
+        icon="expand_more"
+        @click="loadMore"
+        class="show-more-btn"
+      />
+    </div>
   </div>
 </template>
 
@@ -63,12 +77,27 @@ export default {
       rankFilter: '',
       statusFilter: '',
       searchTerm: '',
+      offset: 0,
+      initialLimit: 30,
+      loadMoreLimit: 15,
+      hasMore: true,
+      isLoadingMore: false,
     };
   },
   methods: {
     fetchAllNotes() {
+      // Reset pagination state
+      this.offset = 0;
+      this.hasMore = true;
+      
       const workspace_id = this.$route.query?.workspace_id;
-      const params = { workspace_id: workspace_id, mode: this.viewMode };
+      const params = { 
+        workspace_id: workspace_id, 
+        mode: this.viewMode,
+        limit: this.initialLimit,
+        offset: 0,
+        order: this.orderDesc ? 'desc' : 'asc'
+      };
       if (this.rankFilter !== '' && this.rankFilter !== null && this.rankFilter !== undefined) params.rank = this.rankFilter;
       if (this.statusFilter !== '' && this.statusFilter !== null && this.statusFilter !== undefined) params.status = this.statusFilter;
       if ((this.searchTerm || '').trim() !== '') params.search = (this.searchTerm || '').trim();
@@ -77,7 +106,10 @@ export default {
         .then((response) => {
           if (response.status === 200) {
             const list = response.data.postits || [];
-            this.postitList = list.slice().sort((a, b) => this.orderDesc ? (b.id - a.id) : (a.id - b.id));
+            this.postitList = list;
+            this.offset = list.length;
+            // If we received fewer notes than requested, there are no more
+            this.hasMore = list.length >= this.initialLimit;
             if (response.data?.workspace_id) {
               this.$router.push({
                 query: { workspace_id: response.data.workspace_id },
@@ -87,6 +119,40 @@ export default {
         })
         .catch((error) => {
           console.log(error);
+        });
+    },
+    loadMore() {
+      if (this.isLoadingMore || !this.hasMore) return;
+      
+      this.isLoadingMore = true;
+      const workspace_id = this.$route.query?.workspace_id;
+      const params = { 
+        workspace_id: workspace_id, 
+        mode: this.viewMode,
+        limit: this.loadMoreLimit,
+        offset: this.offset,
+        order: this.orderDesc ? 'desc' : 'asc'
+      };
+      if (this.rankFilter !== '' && this.rankFilter !== null && this.rankFilter !== undefined) params.rank = this.rankFilter;
+      if (this.statusFilter !== '' && this.statusFilter !== null && this.statusFilter !== undefined) params.status = this.statusFilter;
+      if ((this.searchTerm || '').trim() !== '') params.search = (this.searchTerm || '').trim();
+      
+      axios
+        .get(`/app/list_postits`, { params, withCredentials: true })
+        .then((response) => {
+          if (response.status === 200) {
+            const list = response.data.postits || [];
+            this.postitList = [...this.postitList, ...list];
+            this.offset += list.length;
+            // If we received fewer notes than requested, there are no more
+            this.hasMore = list.length >= this.loadMoreLimit;
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        })
+        .finally(() => {
+          this.isLoadingMore = false;
         });
     },
     changeViewMode(payload) {
@@ -102,12 +168,23 @@ export default {
     },
     changeOrder(dir) {
       this.orderDesc = dir ? (dir === 'desc') : !this.orderDesc;
-      // Re-sort current list without refetch
-      this.postitList = (this.postitList || []).slice().sort((a, b) => this.orderDesc ? (b.id - a.id) : (a.id - b.id));
+      // Refetch from backend with new order
+      this.fetchAllNotes();
     },
     openNewNoteDialog() {
       // Use the PageHeader child component's dialog opening method
       this.$refs.pageHeader && this.$refs.pageHeader.newNoteDialog();
+    },
+    handleScroll() {
+      // Check if user has scrolled near the bottom
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+
+      // Trigger load more when within 200px of bottom
+      if (scrollTop + windowHeight >= documentHeight - 200) {
+        this.loadMore();
+      }
     },
   },
   computed: {
@@ -115,6 +192,10 @@ export default {
   },
   mounted() {
     this.fetchAllNotes();
+    window.addEventListener('scroll', this.handleScroll);
+  },
+  beforeUnmount() {
+    window.removeEventListener('scroll', this.handleScroll);
   },
 };
 </script>
@@ -184,6 +265,29 @@ export default {
 @media (min-width: 1280px) {
   .cards-list { justify-content: center; }
   .cards-list > .PostitMain { flex-basis: 360px; }
+}
+
+/* Show more button styling */
+.show-more-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+  margin-bottom: 24px;
+}
+
+.show-more-btn {
+  min-width: 180px;
+  padding: 12px 24px;
+  border-radius: 16px;
+  background: white;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 10px 24px rgba(31, 45, 61, 0.12);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.show-more-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(31, 45, 61, 0.16);
 }
 
 /* Empty state styling */

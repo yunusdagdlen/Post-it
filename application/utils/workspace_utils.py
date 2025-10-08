@@ -161,13 +161,17 @@ class WorkspaceUtils:
         return response
 
     @staticmethod
-    def get_workspace_notes(workspace_uuid: str, mode: str = 'default', rank: Optional[str] = None, status: Optional[str] = None, search: Optional[str] = None) -> List[Dict[str, Any]]:
-        """Return notes for a workspace, filtered by mode, and optionally by rank/status; sorted by id desc.
+    def get_workspace_notes(workspace_uuid: str, mode: str = 'default', rank: Optional[str] = None, status: Optional[str] = None, search: Optional[str] = None, limit: Optional[int] = None, offset: int = 0, order: str = 'desc') -> List[Dict[str, Any]]:
+        """Return notes for a workspace, filtered by mode, and optionally by rank/status; sorted by database query.
 
         Supported modes: 'active', 'disabled'/'deactive', 'all', '' (default -> all).
         Optional filters:
         - rank: 1–5 (ints or numeric strings). 0 or empty means no filter.
         - status: 0=new, 1=in progress, 2=done (ints or strings like 'new', 'progress', 'done').
+        - search: text search in title or note
+        - limit: maximum number of results to return (None = no limit)
+        - offset: number of results to skip (default = 0)
+        - order: 'asc' for oldest first, 'desc' for newest first (default = 'desc')
         """
         results: List[Dict[str, Any]] = []
         mode = bleach.clean(mode)
@@ -210,6 +214,18 @@ class WorkspaceUtils:
             except Exception:
                 pass
 
+            # Apply ORDER BY at database level
+            if order == 'asc':
+                postit_query = postit_query.order_by(Postit.id.asc())
+            else:
+                postit_query = postit_query.order_by(Postit.id.desc())
+            
+            # Apply LIMIT and OFFSET at database level
+            if limit is not None:
+                postit_query = postit_query.limit(limit)
+            if offset > 0:
+                postit_query = postit_query.offset(offset)
+
             for rec in postit_query.all():
                 results.append({
                     'id': rec.id,
@@ -223,8 +239,7 @@ class WorkspaceUtils:
                     'status': rec.status,
                     'rank': rec.rank,
                 })
-        # Keep default sort: newest first
-        results = sorted(results, key=lambda x: x['id'], reverse=True)
+        
         return results
 
     @staticmethod

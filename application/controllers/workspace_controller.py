@@ -70,11 +70,18 @@ def list_postits_app():
         or request.args.get('filter[search]')
         or request.args.get('filter.search')
     )
+    
+    # Pagination parameters
+    limit = request.args.get('limit', type=int)
+    offset = request.args.get('offset', type=int, default=0)
+    
+    # Order parameter: 'asc' or 'desc' (default: 'desc')
+    order = request.args.get('order', 'desc')
 
     workspace_uuid = WorkspaceUtils.get_workspace_id()
     response_payload = {
         'workspace_id': workspace_uuid,
-        'postits': WorkspaceUtils.get_workspace_notes(workspace_uuid=workspace_uuid, mode=mode, rank=rank, status=status, search=search),
+        'postits': WorkspaceUtils.get_workspace_notes(workspace_uuid=workspace_uuid, mode=mode, rank=rank, status=status, search=search, limit=limit, offset=offset, order=order),
     }
     resp = jsonify(response_payload)
     # Ensure cookie reflects the active workspace (newly created or switched)
