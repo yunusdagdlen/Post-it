@@ -139,12 +139,12 @@
             rounded
             flat
             dense
-            icon="restart_alt"
+            icon="add_circle_outline"
             class="q-px-md"
-            aria-label="Reset workspace"
+            aria-label="New workspace"
             @click="resetWorkspace"
           >
-            <q-tooltip anchor="bottom middle" self="top middle" class="bg-grey-9 text-white">Reset workspace</q-tooltip>
+            <q-tooltip anchor="bottom middle" self="top middle" class="bg-grey-9 text-white">New workspace</q-tooltip>
           </q-btn>
         </div>
         <div class="q-mr-sm actions mobile-actions">
@@ -223,8 +223,8 @@
             </q-expansion-item>
             <q-separator />
             <q-item clickable @click="mobileActionsOpen=false; resetWorkspace()">
-              <q-item-section avatar><q-icon name="restart_alt" /></q-item-section>
-              <q-item-section>Reset workspace</q-item-section>
+              <q-item-section avatar><q-icon name="add_circle_outline" /></q-item-section>
+              <q-item-section>New workspace</q-item-section>
             </q-item>
           </q-list>
         </div>
@@ -554,18 +554,18 @@ export default {
       const currentUrl = window.location.href;
       this.$swal
         .fire({
-          title: 'Clear workspace? ',
+          title: 'Start new workspace?',
           html:
             `<div style="text-align:left;">
-               <div style="font-size:14px; color:#555; margin-bottom:8px;">This will remove your workspace id from session. You will get a fresh workspace afterwards.</div>
+               <div style="font-size:14px; color:#555; margin-bottom:8px;">This will create a fresh workspace. Your current workspace can be accessed anytime using the link below.</div>
                <div style="display:flex; align-items:center; gap:8px; padding:10px; border-radius:8px; background:#f8f9fb;">
                  <span style="flex:1; overflow:auto; white-space:nowrap; font-family:monospace; font-size:12px;" id="current-url">${currentUrl}</span>
                  <button id="copy-url-btn" style="cursor:pointer; border:none; background:#e9ecef; padding:6px 10px; border-radius:6px; font-size:12px;">📋 Copy URL</button>
                </div>
              </div>`,
-          icon: 'warning',
+          icon: 'info',
           showCancelButton: true,
-          confirmButtonText: 'Yes, clear it',
+          confirmButtonText: 'Yes, start new',
           cancelButtonText: 'Cancel',
           focusCancel: true,
           didOpen: () => {
