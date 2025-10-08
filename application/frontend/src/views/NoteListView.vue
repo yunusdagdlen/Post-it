@@ -1,6 +1,6 @@
 <template class="q-px-xl">
   <div class="home q-mx-xl">
-    <div class="page-header q-mb-xl full-width bg-white">
+    <div class="page-header q-mb-md full-width bg-white">
       <page-header @success="fetchAllNotes" @filter="changeViewMode" @order="changeOrder" :postitList="this.postitList" />
     </div>
 
@@ -280,7 +280,7 @@ export default {
 
 <style scoped>
 .home {
-  padding-top: 5vh;
+  padding-top: 2vh;
   padding-bottom: 4vh;
 }
 

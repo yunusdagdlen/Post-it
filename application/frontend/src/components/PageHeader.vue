@@ -1,87 +1,75 @@
 <template class="">
   <div class="PageHeader">
-    <div class="HeaderToolbar bordered bg-white">
-      <q-toolbar class="q-px-xl rounded bordered">
-        <q-toolbar-title class="text-weight-medium">
+    <div class="HeaderToolbar">
+      <div class="header-content">
+        <!-- Logo on the left -->
+        <div class="logo-section">
           <router-link
-            style="text-decoration: none; color: #adb5bd"
+            class="logo-link"
             :to="{ path: 'app', query: { workspace_id: workspace_id } }"
           >
-            {{ headerTitle }}
+            NotedFlow
           </router-link>
-        </q-toolbar-title>
-        <!-- Centered search -->
-        <div class="header-search gt-sm">
-          <q-input
-            v-model="searchTerm"
-            dense
-            rounded
-            borderless
-            clearable
-            debounce="300"
-            placeholder="Search notes..."
-            @update:model-value="setSearch"
-            input-class="text-body2"
-            aria-label="Search notes"
-          >
-            <template v-slot:prepend>
-              <q-icon name="search" />
-            </template>
-          </q-input>
         </div>
-        <div class="q-mr-md actions desktop-actions">
-          <q-btn
-            rounded
-            flat
-            dense
-            icon="mdi-pencil-plus-outline"
-            class="q-px-md"
+        
+        <!-- Centered search bar -->
+        <div class="search-section gt-sm">
+          <div class="search-wrapper">
+            <q-icon name="search" class="search-icon" />
+            <input
+              v-model="searchTerm"
+              type="text"
+              placeholder="Search notes..."
+              class="search-input"
+              @input="setSearch"
+              aria-label="Search notes"
+            />
+          </div>
+        </div>
+        
+        <!-- Action buttons on the right -->
+        <div class="actions desktop-actions">
+          <button
+            class="action-btn"
             aria-label="Add note"
             @click="newNoteDialog"
           >
+            <q-icon name="mdi-pencil-plus-outline" size="20px" />
             <q-tooltip anchor="bottom middle" self="top middle" class="bg-grey-9 text-white">Add note</q-tooltip>
-          </q-btn>
-          <q-btn
-            rounded
-            flat
-            dense
-            :icon="viewToggleIcon"
-            class="q-px-md"
+          </button>
+          <button
+            class="action-btn"
             :aria-label="viewToggleAria"
             @click="toggleView"
           >
+            <q-icon :name="viewToggleIcon" size="20px" />
             <q-tooltip anchor="bottom middle" self="top middle" class="bg-grey-9 text-white">{{ viewToggleTooltip }}</q-tooltip>
-          </q-btn>
-          <q-btn
-            rounded
-            flat
-            dense
-            icon="link"
-            class="q-px-md"
+          </button>
+          <button
+            class="action-btn"
             aria-label="Copy workspace link"
             @click="CopyWorkspaceUrl"
           >
+            <q-icon name="link" size="20px" />
             <q-tooltip anchor="bottom middle" self="top middle" class="bg-grey-9 text-white">Copy workspace link</q-tooltip>
-          </q-btn>
-          <q-btn
-            rounded
-            flat
-            dense
-            :icon="orderIcon"
-            class="q-px-md"
+          </button>
+          <button
+            class="action-btn"
             :aria-label="orderActionLabel"
             @click="toggleOrder"
           >
+            <q-icon :name="orderIcon" size="20px" />
             <q-tooltip anchor="bottom middle" self="top middle" class="bg-grey-9 text-white">{{ orderTooltip }}</q-tooltip>
-          </q-btn>
+          </button>
           <q-btn-dropdown
-            rounded
             flat
             dense
             icon="filter_alt"
-            class="q-px-md"
+            dropdown-icon=""
+            class="filter-dropdown"
             aria-label="Filter"
             content-class="viewmode-menu"
+            style="min-width: 60px;"
           >
             <q-list style="min-width: 200px">
               <q-item clickable v-close-popup @click="resetFilters()">
@@ -135,22 +123,23 @@
             </q-list>
             <q-tooltip anchor="bottom middle" self="top middle" class="bg-grey-9 text-white">Filter</q-tooltip>
           </q-btn-dropdown>
-          <q-btn
-            rounded
-            flat
-            dense
-            icon="add_circle_outline"
-            class="q-px-md"
+          <button
+            class="action-btn"
             aria-label="New workspace"
             @click="resetWorkspace"
           >
+            <q-icon name="add_circle_outline" size="20px" />
             <q-tooltip anchor="bottom middle" self="top middle" class="bg-grey-9 text-white">New workspace</q-tooltip>
-          </q-btn>
+          </button>
         </div>
-        <div class="q-mr-sm actions mobile-actions">
-          <q-btn rounded flat dense icon="menu" aria-label="Open actions" @click="mobileActionsOpen = !mobileActionsOpen" />
+        
+        <!-- Mobile menu button -->
+        <div class="actions mobile-actions">
+          <button class="action-btn" aria-label="Open actions" @click="mobileActionsOpen = !mobileActionsOpen">
+            <q-icon name="menu" size="20px" />
+          </button>
         </div>
-      </q-toolbar>
+      </div>
       <q-slide-transition>
         <div v-if="mobileActionsOpen" class="mobile-actions-panel">
           <q-list>
@@ -397,9 +386,9 @@ export default {
       // emit combined filters including rank/status/search along with current mode
       this.$emit('filter', { mode: this.currentMode, rank: this.currentRankFilter, status: this.currentStatusFilter, search: (this.searchTerm || '').trim() });
     },
-    setSearch(val) {
+    setSearch(event) {
       // keep local state already updated via v-model; emit filters to parent
-      this.searchTerm = val;
+      this.searchTerm = event.target.value;
       this.emitFilters();
     },
     setRankFilter(val) {
@@ -605,65 +594,182 @@ export default {
 .PageHeader {
   background: transparent;
   width: 100%;
+  padding: 12px;
 }
 
+/* Header toolbar with flex layout */
 .HeaderToolbar {
-  background: rgba(255, 255, 255, 0.7);
-  border-radius: 16px;
-  border: 1px solid rgba(173, 181, 189, 0.4);
-  color: #495057;
-  font-weight: 600;
-  margin-top: 5vh;
-  box-shadow: 0 6px 20px rgba(31, 45, 61, 0.08);
-  backdrop-filter: saturate(150%) blur(8px);
+  background: transparent;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
-.HeaderToolbar .q-toolbar {
-  min-height: 56px;
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
 }
 
-/* Reduce toolbar horizontal padding on small screens to avoid overflow */
+/* Logo section - left aligned with modern minimal font */
+.logo-section {
+  flex: 0 0 auto;
+}
+
+.logo-link {
+  text-decoration: none;
+  color: #333;
+  font-size: 28px;
+  font-weight: 500;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  letter-spacing: -0.5px;
+  transition: color 0.2s ease;
+}
+
+.logo-link:hover {
+  color: #555;
+}
+
+/* Search section - centered */
+.search-section {
+  flex: 1 1 auto;
+  display: flex;
+  justify-content: center;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.search-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+  font-size: 20px;
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 16px 8px 40px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #333;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-input::placeholder {
+  color: #999;
+}
+
+.search-input:focus {
+  border-color: #999;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Action buttons - right aligned */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
+.action-btn {
+  width: 36px;
+  height: 36px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.action-btn:hover {
+  background: #f9f9f9;
+  border-color: #bbb;
+}
+
+.action-btn:active {
+  background: #f0f0f0;
+}
+
+/* Filter dropdown styling */
+.filter-dropdown {
+  width: 36px;
+  height: 36px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  min-width: 36px;
+}
+
+.filter-dropdown:hover {
+  background: #f9f9f9;
+  border-color: #bbb;
+}
+
+/* Responsive behavior */
+.mobile-actions {
+  display: none;
+}
+
+.desktop-actions {
+  display: flex;
+}
+
 @media (max-width: 599px) {
-  .HeaderToolbar .q-toolbar {
-    padding-left: 8px !important;
-    padding-right: 8px !important;
+  .desktop-actions {
+    display: none;
+  }
+  .mobile-actions {
+    display: flex;
+  }
+  .search-section {
+    display: none;
+  }
+  .header-content {
+    padding: 8px 12px;
   }
 }
 
-/* Show/hide action groups based on screen width */
-.actions { display: flex; align-items: center; }
-.mobile-actions { display: none; }
-.desktop-actions { display: flex; }
-@media (max-width: 599px) {
-  .desktop-actions { display: none; }
-  .mobile-actions { display: flex; }
-}
-
- .HeaderToolbar .q-btn {
-  margin-left: 2px;
-  margin-right: 2px;
-}
-
-/* Search area aligned to the left */
-.header-search {
-  flex: 0 1 520px;
-  max-width: 520px;
-  margin-left: 0;
-  margin-right: auto;
+@media (max-width: 900px) {
+  .logo-link {
+    font-size: 24px;
+  }
 }
 
 /* Mobile slide-down actions panel */
 .mobile-actions-panel {
   display: none;
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(173, 181, 189, 0.4);
-  border-top: none;
-  border-radius: 0 0 16px 16px;
-  box-shadow: 0 10px 24px rgba(31, 45, 61, 0.12);
-  padding: 4px 6px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-top: 12px;
+  padding: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
+
 @media (max-width: 599px) {
-  .mobile-actions-panel { display: block; }
+  .mobile-actions-panel {
+    display: block;
+  }
 }
 
 /* Modern modal styles */

@@ -361,9 +361,9 @@ export default {
               const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('Puter TTS timeout')), 3000));
               const audio = await Promise.race([p.ai.txt2speech(text,
                   {
-                    voice: "Amy",
-                    engine: "standard",
-                    language: "en-GB"
+                    voice: "Joanna",
+                    engine: "neural",
+                    language: "en-US"
                   }),
                   timeout]);
               if (audio?.play) {
@@ -481,9 +481,9 @@ export default {
               const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('Puter TTS timeout')), 3000));
               const audio = await Promise.race([p.ai.txt2speech(text,
                   {
-                    voice: "Amy",
-                    engine: "standard",
-                    language: "en-GB"
+                    voice: "Joanna",
+                    engine: "neural",
+                    language: "en-US"
                   }),
                   timeout]);
               if (audio?.play) {

@@ -27,7 +27,11 @@ html, body, #app {
 * { font-family: inherit; }
 
 .app-layout {
-  background: linear-gradient(135deg, #f7f9fc 0%, #eef2f7 100%);
+  background: 
+    linear-gradient(to right, #e0e0e0 1px, transparent 1px),
+    linear-gradient(to bottom, #e0e0e0 1px, transparent 1px);
+  background-color: #f5f5f5;
+  background-size: 20px 20px;
   min-height: 100vh;
   color: #2f3542;
 }

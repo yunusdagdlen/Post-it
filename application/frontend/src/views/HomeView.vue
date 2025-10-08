@@ -1,7 +1,7 @@
 <template>
   <div class="home fullscreen scroll">
     <div
-      class="page-header q-mb-xl full-width bg-white"
+      class="page-header q-mb-md full-width bg-white"
       style="border-radius: 15px"
     >
       <page-header
@@ -121,7 +121,7 @@ export default {
 
 <style scoped>
 .home {
-  padding-top: 5vh;
+  padding-top: 2vh;
   padding-bottom: 4vh;
   padding-left: 12px;
   padding-right: 12px;
